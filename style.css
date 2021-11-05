@@ -1,0 +1,22 @@
+body {
+  background-color: black;
+  overflow: hidden;
+}
+
+#matter {
+  overflow: hidden;
+  background: url(https://cdn.glitch.me/f9f57fd2-6aed-4d76-8464-bd94d9fd7afd%2FBlue_Sky.jpg?v=1636132395719);
+  background-repeat: no-repeat;
+  background-size: auto;
+  max-width: 800px;
+}
+
+#ground {
+  position: absolute;
+  height: 50px;
+  width: 780px;
+  left: 20px;
+  top: 562px;
+  background: url(https://cdn.glitch.me/f9f57fd2-6aed-4d76-8464-bd94d9fd7afd%2Fgrass.png?v=1636149250949);
+  background-size: 30%, 30%;
+}
