@@ -19,11 +19,11 @@ const Car = function(xx, yy, width, height, wheelSize) {
 
   const group = Body.nextGroup(true),
       wheelBase = 10,
-      wheelAOffset = -106,
-      wheelBOffset = +82,
+      wheelAOffset = -104,
+      wheelBOffset = +80,
       wheelYOffset = 25;
 
-  const bodyTexture = 'https://cdn.glitch.me/f9f57fd2-6aed-4d76-8464-bd94d9fd7afd%2Fvw.svg?v=1636125092059';
+  const bodyTexture = 'https://cdn.glitch.me/f9f57fd2-6aed-4d76-8464-bd94d9fd7afd%2Fvw.png?v=1635806145842';
   const wheelTexture = 'https://cdn.glitch.me/f9f57fd2-6aed-4d76-8464-bd94d9fd7afd%2Fwheel.png?v=1635811446523';
   
   const car = Composite.create({ label: 'Car' });   
@@ -50,8 +50,6 @@ const Car = function(xx, yy, width, height, wheelSize) {
     render: {
       sprite: {
         texture: bodyTexture,
-        xScale: 1.1,
-        yScale: 1.1,
       }
     }
   };
@@ -67,7 +65,7 @@ const Car = function(xx, yy, width, height, wheelSize) {
           sprite: {
             texture: wheelTexture,
             xScale: 0.2,
-            yScale: 0.2
+            yScale: 0.2,
           }
         }
   });

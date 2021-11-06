@@ -21,7 +21,7 @@ var render = Render.create({
   engine: engine,
   options: {
     wireframes: false,
-    background: 'none'
+    background: 'url(https://cdn.glitch.me/162ab29c-f4ce-432b-bc31-be8166f857c7%2Fblue_sky.png?v=1636222770371)'
   }
 });
 
@@ -30,9 +30,9 @@ var crateOptions = {
   render: {
     strokeStyle: '#00ff00',
     sprite: {
-      texture: 'https://cdn.glitch.me/f9f57fd2-6aed-4d76-8464-bd94d9fd7afd%2Fcrate.svg?v=1635850064699',
-      xScale: 0.55,
-      yScale: 0.55,
+      texture: 'https://cdn.glitch.me/162ab29c-f4ce-432b-bc31-be8166f857c7%2Fcrate.png?v=1636217649425',
+      xScale: 0.32,
+      yScale: 0.32,
     }
   }
 };     
@@ -41,7 +41,7 @@ var crateOptions = {
 var groundOptions = { 
   isStatic: true,  
   render: { 
-    fillStyle: 'none' 
+    fillStyle: '#338833'
   }
 };
 var ground = Bodies.rectangle(400, 610, 780, 50, groundOptions);
@@ -56,9 +56,11 @@ Composite.add(engine.world, [car, ground]);
 var keys = [];
 document.body.addEventListener("keydown", function(e) {
   keys[e.keyCode] = true;
+  e.preventDefault();
 });
 document.body.addEventListener("keyup", function(e) {
   keys[e.keyCode] = false;
+  e.preventDefault();
 });
 
 // run the renderer
@@ -77,6 +79,25 @@ Events.on(runner, "beforeTick", function(event) {
   updateBoxes();
 });
 
+var ctx = render.canvas.getContext('2d');
+var grassImg = new Image();
+grassImg.src = 'https://cdn.glitch.me/f9f57fd2-6aed-4d76-8464-bd94d9fd7afd%2Fgrass.png?v=1636149250949';
+grassImg.onload =  () =>  {
+  var scale = 0.27;
+  var tempCanvas = document.createElement("canvas"),
+  tCtx = tempCanvas.getContext("2d");
+  tempCanvas.width = grassImg.width * scale;
+  tempCanvas.height = grassImg.height * scale;
+  tCtx.drawImage(grassImg, 0, 0, grassImg.width, grassImg.height, 0, 0,  grassImg.width * scale,  grassImg.height * scale);
+  render.grassPattern = ctx.createPattern(tempCanvas, 'repeat');
+};
+
+Events.on(render, "afterRender", () => {
+  ctx.fillStyle = render.grassPattern || '#338833';
+  ctx.fillRect(10, 560, 780, 80, 40);
+});
+
+
 function updateBoxes() {
   boxes.forEach((box, i) => {
     if(box.position.y > 1000) {
@@ -90,7 +111,6 @@ var boxes = [];
 
 function addBox() {
   if(boxes.length < 10) {
-    console.log(boxes.length)
     let box = Bodies.rectangle(30 + Math.random() * 740, 0, 80, 80, crateOptions);
     Body.rotate(box, Math.random());
     boxes.push(box);
@@ -119,3 +139,18 @@ touchEl.addEventListener('pointerup', (e) => {
   isAccel = false;
   isBrake = false;
 });
+
+function resize() {
+  if (window.innerWidth >= window.innerHeight * 1.333) {
+    var h = window.innerHeight;
+    var w = window.innerHeight * 1.333;
+  } 
+  else {
+    var w = window.innerWidth;
+    var h = window.innerWidth / 1.333;
+  }
+  render.canvas.style.width = w + 'px';
+  render.canvas.style.height = h + 'px';
+}
+window.onresize = resize;
+resize();
