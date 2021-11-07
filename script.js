@@ -130,13 +130,13 @@ function renderHUD() {
       messageText = '';
   }
   ctx.save();
-  ctx.font = 'bold 30px Sans Serif';
+  ctx.font = 'bold 30px Verdana';
   ctx.fillStyle = color;
   ctx.shadowColor = '#555'
   ctx.shadowOffsetX = 2;
   ctx.shadowOffsetY = 2;
   ctx.textAlign = 'center';
-  ctx.fillText(boxes.length + '/' + level.MAX_BOXES, 50, 50);
+  ctx.fillText(boxes.length + '/' + level.MAX_BOXES, 75, 50);
   ctx.fillText(messageText, 400, 50);
   ctx.fillText(remaining, 750, 50);
   ctx.restore();
@@ -148,7 +148,6 @@ function updateBoxes() {
     if(box.position.y > 1000) {
       box = null;
       boxes.splice(i, 1);
-      remaining--;
     }
   });
   if(remaining === 0)
@@ -163,6 +162,7 @@ function addBox() {
     Body.rotate(box, Math.random());
     boxes.push(box);
     Composite.add(engine.world, [box]);
+    remaining--;
   }
 }
 
@@ -174,19 +174,40 @@ function addBox() {
     }, rand);
 }());
 
-const touchEl = document.querySelector('#matter');
+const pointerEl = document.querySelector('#matter');
 
-touchEl.addEventListener('pointerdown', (e) => {
-  if(e.clientX > 400)
-    isAccel = true;
-  else
-    isBrake = true;
-});
+var isBrake = false, 
+    isAccel = false;
 
-touchEl.addEventListener('pointerup', (e) => {
+pointerEl.addEventListener('pointerdown', (e) => { move(e.clientX); }, false);
+pointerEl.addEventListener('pointerup', (e) => {
   isAccel = false;
   isBrake = false;
-});
+}, false);
+pointerEl.addEventListener('pointercancel', (e) => {
+  isAccel = false;
+  isBrake = false;
+}, false);
+pointerEl.addEventListener('pointerleave', (e) => {
+  isAccel = false;
+  isBrake = false;
+}, false);
+pointerEl.addEventListener('pointermove', (e) => {
+  if(e.buttons > 0) {
+    move(e.clientX);
+  }
+}, false);
+
+function move(x) {
+  if(x > 400) {
+    isAccel = true;
+    isBrake = false;
+  }
+  else {
+    isBrake = true;
+    isAccel = false;
+  }
+}
 
 function resize() {
   if (window.innerWidth >= window.innerHeight * 1.333) {
