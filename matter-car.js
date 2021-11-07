@@ -21,7 +21,7 @@ const Car = function(xx, yy, width, height, wheelSize) {
       wheelBase = 10,
       wheelAOffset = -104,
       wheelBOffset = +80,
-      wheelYOffset = 25;
+      wheelYOffset = 22;
 
   const bodyTexture = 'https://cdn.glitch.me/f9f57fd2-6aed-4d76-8464-bd94d9fd7afd%2Fvw.png?v=1635806145842';
   const wheelTexture = 'https://cdn.glitch.me/f9f57fd2-6aed-4d76-8464-bd94d9fd7afd%2Fwheel.png?v=1635811446523';

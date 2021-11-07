@@ -3,6 +3,18 @@ import Matter from './matter.js';
 import Car from './matter-car.js';
 // import Car from './Car.js';
 
+
+var level = { 
+  MAX_BOXES: 10,
+  DANGER_BOXES:7,
+  WARN_BOXES:4,
+  BOXES: 20
+}
+
+var remaining = level.BOXES;
+
+var GAME_RUNNING = true;
+
 // module aliases
 var Engine = Matter.Engine,
     Render = Matter.Render,
@@ -48,7 +60,7 @@ var ground = Bodies.rectangle(400, 610, 780, 50, groundOptions);
 
 // create a car
 var scale = 0.9;
-var car = Composite.create(new Car(400, 500, 300 * scale, 50 * scale, 30 * scale));
+var car = Composite.create(new Car(400, 560, 300 * scale, 50 * scale, 30 * scale));
 
 // add all of the bodies to the world
 Composite.add(engine.world, [car, ground]);
@@ -92,10 +104,43 @@ grassImg.onload =  () =>  {
   render.grassPattern = ctx.createPattern(tempCanvas, 'repeat');
 };
 
+var messageText = '';
 Events.on(render, "afterRender", () => {
   ctx.fillStyle = render.grassPattern || '#338833';
   ctx.fillRect(10, 560, 780, 80, 40);
+  if(GAME_RUNNING)
+    renderHUD();
 });
+
+
+function renderHUD() {
+  var color = '#44AA44';
+  if(boxes.length > level.DANGER_BOXES) {
+    color = '#ff0000';
+    messageText = 'DANGER!'; 
+  }
+  else if(boxes.length > level.WARN_BOXES) {
+    color = 'orange';
+    messageText = 'WARNING!';
+  }
+  else {
+    if((level.BOXES - remaining) < 5)
+      messageText = 'CLEAR THE BOXES!';
+    else
+      messageText = '';
+  }
+  ctx.save();
+  ctx.font = 'bold 30px Sans Serif';
+  ctx.fillStyle = color;
+  ctx.shadowColor = '#555'
+  ctx.shadowOffsetX = 2;
+  ctx.shadowOffsetY = 2;
+  ctx.textAlign = 'center';
+  ctx.fillText(boxes.length + '/' + level.MAX_BOXES, 50, 50);
+  ctx.fillText(messageText, 400, 50);
+  ctx.fillText(remaining, 750, 50);
+  ctx.restore();
+}
 
 
 function updateBoxes() {
@@ -103,14 +148,17 @@ function updateBoxes() {
     if(box.position.y > 1000) {
       box = null;
       boxes.splice(i, 1);
+      remaining--;
     }
   });
+  if(remaining === 0)
+    level.complete = true;
 }
 
 var boxes = [];
 
 function addBox() {
-  if(boxes.length < 10) {
+  if(boxes.length < level.MAX_BOXES && !level.complete) {
     let box = Bodies.rectangle(30 + Math.random() * 740, 0, 80, 80, crateOptions);
     Body.rotate(box, Math.random());
     boxes.push(box);
