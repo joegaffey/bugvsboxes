@@ -1,33 +1,10 @@
-/* body {
-  background-color: #111111;
-  height: 100%;
-  width: 100%;
-  overflow: scroll;
-}
-
-#matter {
-  position: absolute;
-  top: 0px;
-  bottom: 0px;
-  left: 0px;
-  right: 0px;
-}
-
-#matter > canvas {
-  width: 800px;
-  height: 600px;
-  display: block;
-  margin: 0 auto;
-}
- */
-
 body {
   background-color: #111111;
-/*   background-size: 100% auto;
-  background-repeat:no-repeat; */
   overflow: hidden;
   padding: 0;
   margin: 0;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .matter {
