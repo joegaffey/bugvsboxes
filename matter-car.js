@@ -1,4 +1,5 @@
 import Matter from './matter.js';
+import Assets from './assets.js';
 
 /**
 * Creates a composite with simple car setup of bodies and constraints.
@@ -23,8 +24,8 @@ const Car = function(xx, yy, width, height, wheelSize) {
       wheelBOffset = +80,
       wheelYOffset = 22;
 
-  const bodyTexture = 'https://cdn.glitch.me/f9f57fd2-6aed-4d76-8464-bd94d9fd7afd%2Fvw.png?v=1635806145842';
-  const wheelTexture = 'https://cdn.glitch.me/f9f57fd2-6aed-4d76-8464-bd94d9fd7afd%2Fwheel.png?v=1635811446523';
+  const bodyTexture = Assets.path + 'bug.png';
+  const wheelTexture = Assets.path + 'wheel.png';
   
   const car = Composite.create({ label: 'Car' });   
   

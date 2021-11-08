@@ -1,4 +1,5 @@
 import Matter from './matter.js';
+import Assets from './assets.js';
 
 export default class Car {
   
@@ -27,8 +28,8 @@ export default class Car {
         wheelBOffset = +82,
         wheelYOffset = 0;
 
-    const bodyTexture = 'https://cdn.glitch.me/f9f57fd2-6aed-4d76-8464-bd94d9fd7afd%2Fvw.png?v=1635806145842';
-    const wheelTexture = 'https://cdn.glitch.me/f9f57fd2-6aed-4d76-8464-bd94d9fd7afd%2Fwheel.png?v=1635811446523';
+    const bodyTexture = Assets.path + 'bug.png';
+    const wheelTexture = Assets.path + 'wheel.png';
     
     this.car = Composite.create({ label: 'Car' });
     
