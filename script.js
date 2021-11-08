@@ -1,19 +1,8 @@
 import Matter from './matter.js';
-
 import Car from './matter-car.js';
-// import Car from './Car.js';
-
-
-var level = { 
-  MAX_BOXES: 10,
-  DANGER_BOXES:7,
-  WARN_BOXES:4,
-  BOXES: 20
-}
-
-var remaining = level.BOXES;
-
-var GAME_RUNNING = true;
+// import Car from './Car.js';   // @TODO Investigate problem with class structure using Matter
+import Assets from './assets.js';
+import levels from './levels.js';
 
 // module aliases
 var Engine = Matter.Engine,
@@ -25,15 +14,25 @@ var Engine = Matter.Engine,
     Composites = Matter.Composites,
     Events = Matter.Events;
 
+var containerEl = document.querySelector('#matter');
+
+var uiData = {
+  message: ['', 'Clear the boxes!', 'Don\'t fall off the platform!'],
+  button: {
+    label: 'Ok',
+    action: () => showLevel(0)
+  }
+}
+
 // create an engine
 var engine = Engine.create();
 
 var render = Render.create({
-  element: document.querySelector('#matter'),
+  element: containerEl,
   engine: engine,
   options: {
     wireframes: false,
-    background: 'url(https://cdn.glitch.me/162ab29c-f4ce-432b-bc31-be8166f857c7%2Fblue_sky.png?v=1636222770371)'
+    background: 'url(' + Assets.path + 'blue_sky.png)'
   }
 });
 
@@ -42,7 +41,7 @@ var crateOptions = {
   render: {
     strokeStyle: '#00ff00',
     sprite: {
-      texture: 'https://cdn.glitch.me/162ab29c-f4ce-432b-bc31-be8166f857c7%2Fcrate.png?v=1636217649425',
+      texture: Assets.path + 'crate.png',
       xScale: 0.32,
       yScale: 0.32,
     }
@@ -56,19 +55,27 @@ var groundOptions = {
     fillStyle: '#338833'
   }
 };
-var ground = Bodies.rectangle(400, 610, 780, 50, groundOptions);
 
-// create a car
 var scale = 0.9;
-var car = Composite.create(new Car(400, 560, 300 * scale, 50 * scale, 30 * scale));
+var ground, car;
 
-// add all of the bodies to the world
-Composite.add(engine.world, [car, ground]);
+function setupWorld() {
+  ground = Bodies.rectangle(400, 610, 780, 50, groundOptions);
+  car = Composite.create(new Car(400, 530, 300 * scale, 50 * scale, 30 * scale));
+  Composite.add(engine.world, [car, ground]);
+}
+setupWorld();
 
 var keys = [];
 document.body.addEventListener("keydown", function(e) {
   keys[e.keyCode] = true;
   e.preventDefault();
+  if(keys[32] || keys[13]) {
+    if(GAME_RUNNING)
+      pause();
+    else
+      uiData.button.action.call();
+  }
 });
 document.body.addEventListener("keyup", function(e) {
   keys[e.keyCode] = false;
@@ -86,14 +93,82 @@ Runner.run(runner, engine);
 var isAccel = false;
 var isBrake = false;
 Events.on(runner, "beforeTick", function(event) {
+  if(!GAME_RUNNING)
+    return;
   if (keys[90] || keys[37] || isBrake) { car.brake(); };
   if (keys[88] || keys[39] || isAccel) { car.accel(); };
   updateBoxes();
+  updateCar();
 });
+
+var level = levels[0];
+var GAME_RUNNING = false;
+var boxes = [];
+
+function pause() {
+  if(GAME_RUNNING) {
+    uiData = {
+      message: [
+        'Game Paused',
+        'Level ' + level.NUMBER, 
+        level.remaining + boxes.length + ' boxes remaining'
+      ],
+      button: {
+        label: 'Resume',
+        action: () => pause()
+      }
+    }
+    runner.enabled = false;
+    GAME_RUNNING = false;
+  }
+  else {
+    runner.enabled = true;
+    GAME_RUNNING = true;
+  }
+}
+
+function showLevel() {
+  uiData = {
+    message: [
+      'Level ' + level.NUMBER, 
+      'Clear ' + level.BOXES + ' boxes',
+      'Platform Limit: ' + level.MAX_BOXES + ' boxes',
+    ],
+    button: {
+      label: 'Go!',
+      action: () => startLevel()
+    }
+  }
+}
+
+function startLevel(num) {
+  level.remaining = level.BOXES;
+  GAME_RUNNING = true;
+  boxes = [];
+  runner.enabled = true;
+}
+
+function endGame(code) {
+  level = levels[0];
+  var message = ['','Congratulations!', 'You finshed the game!!!']
+  if(code === 1)
+    message = ['','Platform limit exceeded!' , 'Game over!']
+  if(code === 2)
+    message = ['','You fell to your doom!!!', 'Game over!']
+  uiData = {
+    message: message,
+    button: {
+      label: 'Restart',
+      action: () => restart()
+    }
+  }
+  runner.enabled = false;
+  GAME_RUNNING = false;
+}
 
 var ctx = render.canvas.getContext('2d');
 var grassImg = new Image();
-grassImg.src = 'https://cdn.glitch.me/f9f57fd2-6aed-4d76-8464-bd94d9fd7afd%2Fgrass.png?v=1636149250949';
+grassImg.src = Assets.path + 'grass.png';
 grassImg.onload =  () =>  {
   var scale = 0.27;
   var tempCanvas = document.createElement("canvas"),
@@ -110,8 +185,9 @@ Events.on(render, "afterRender", () => {
   ctx.fillRect(10, 560, 780, 80, 40);
   if(GAME_RUNNING)
     renderHUD();
+  else
+    showGUI();
 });
-
 
 function renderHUD() {
   var color = '#44AA44';
@@ -124,8 +200,8 @@ function renderHUD() {
     messageText = 'WARNING!';
   }
   else {
-    if((level.BOXES - remaining) < 5)
-      messageText = 'CLEAR THE BOXES!';
+    if((level.BOXES - level.remaining) < 5)
+      messageText = 'Level ' + level.NUMBER;
     else
       messageText = '';
   }
@@ -138,68 +214,142 @@ function renderHUD() {
   ctx.textAlign = 'center';
   ctx.fillText(boxes.length + '/' + level.MAX_BOXES, 75, 50);
   ctx.fillText(messageText, 400, 50);
-  ctx.fillText(remaining, 750, 50);
+  ctx.fillText(level.remaining, 750, 50);
   ctx.restore();
 }
 
 
 function updateBoxes() {
+  if(boxes.length >= level.MAX_BOXES) {
+    endGame(1);
+    return;
+  }
   boxes.forEach((box, i) => {
     if(box.position.y > 1000) {
       box = null;
       boxes.splice(i, 1);
     }
   });
-  if(remaining === 0)
-    level.complete = true;
+  if(level.remaining === 0 && boxes.length === 0) {
+    if(level.NUMBER >= levels.length)
+      endGame(0); 
+    else
+      levelComplete();
+  }
 }
 
-var boxes = [];
+function updateCar() {
+  if(car.bodies[0].position.y > 1000) {
+    endGame(2);    
+  }
+}
+
+function levelComplete() {
+  level = levels[level.NUMBER];
+  showLevel();
+  console.log(level)
+  runner.enabled = false;
+  GAME_RUNNING = false;
+}
+
+function restart() {
+  Composite.clear(engine.world);
+  Engine.clear(engine);
+  setupWorld();
+  showLevel(0)
+}
+
+function showGUI() {
+  ctx.save();
+  ctx.shadowColor = '#333'
+  ctx.shadowOffsetX = 2;
+  ctx.shadowOffsetY = 2;
+  ctx.fillStyle = 'lightgray'
+  ctx.fillRect(100, 150, 600, 300);
+  ctx.font = 'bold 30px Verdana';
+  ctx.fillStyle = '#888';
+  ctx.textAlign = 'center';
+  uiData.message.forEach((line, i, arr) => {
+    ctx.fillText(line, 400, 200 + i * 50);
+  });
+  ctx.fillStyle = 'darkgrey';
+  var d = getButtonDims(uiData.button.label);
+  ctx.fillRect(d.x, d.y, d.width, d.height);
+  ctx.fillStyle = 'lightgray';
+  ctx.fillText(uiData.button.label, 400, 400);
+  ctx.restore();  
+}
+
+function getButtonDims(text) {
+  var width = text.length * 25 + 30;
+  return {
+    x: (800 - width) / 2,
+    y: 365,
+    width: width,
+    height: 50
+  }
+}
 
 function addBox() {
-  if(boxes.length < level.MAX_BOXES && !level.complete) {
+  if(level.remaining > 0 && boxes.length < level.MAX_BOXES &&  GAME_RUNNING) {
     let box = Bodies.rectangle(30 + Math.random() * 740, 0, 80, 80, crateOptions);
     Body.rotate(box, Math.random());
     boxes.push(box);
     Composite.add(engine.world, [box]);
-    remaining--;
+    level.remaining--;
   }
 }
 
 (function boxLoop() {
-    var rand = Math.round(Math.random() * (5000)) + 1000;
+    var rand = Math.round(Math.random() * (level.VAR_RATE)) + level.MIN_RATE;
     setTimeout(function() {
       addBox();
       boxLoop();  
     }, rand);
 }());
 
-const pointerEl = document.querySelector('#matter');
-
 var isBrake = false, 
     isAccel = false;
 
-pointerEl.addEventListener('pointerdown', (e) => { move(e.clientX); }, false);
-pointerEl.addEventListener('pointerup', (e) => {
-  isAccel = false;
-  isBrake = false;
+containerEl.addEventListener('pointerdown', (e) => { 
+  if(GAME_RUNNING)
+    move(e.clientX); 
+  else if(isInside(getButtonDims(uiData.button.label), {x: e.clientX, y: e.clientY}))
+    uiData.button.action.call();
 }, false);
-pointerEl.addEventListener('pointercancel', (e) => {
-  isAccel = false;
-  isBrake = false;
-}, false);
-pointerEl.addEventListener('pointerleave', (e) => {
-  isAccel = false;
-  isBrake = false;
-}, false);
-pointerEl.addEventListener('pointermove', (e) => {
+containerEl.addEventListener('pointerup', (e) => { stop() }, false);
+containerEl.addEventListener('pointercancel', (e) => { stop() }, false);
+containerEl.addEventListener('pointerleave', (e) => { stop() }, false);
+containerEl.addEventListener('pointermove', (e) => {
   if(e.buttons > 0) {
     move(e.clientX);
   }
 }, false);
 
+function isInside(box, point) {
+  var x, y;
+  if(ctx.canvas.clientWidth <= 800) {
+    x = point.x / ctx.canvas.clientWidth * 800;
+    y = point.y / ctx.canvas.clientHeight * 600;
+  }
+  else {
+    x = 800 / ctx.canvas.clientWidth * point.x;
+    y = 600 / ctx.canvas.clientHeight * point.y;
+  }
+  if(x > box.x && x < box.x + box.width &&
+     y > box.y && y < box.y + box.height)
+    return true;
+  else 
+    return false;
+}
+
+function stop() {
+  isAccel = false;
+  isBrake = false;
+}
+
 function move(x) {
-  if(x > 400) {
+  if(x > containerEl.offsetWidth / 2) {
     isAccel = true;
     isBrake = false;
   }
@@ -221,5 +371,6 @@ function resize() {
   render.canvas.style.width = w + 'px';
   render.canvas.style.height = h + 'px';
 }
+
 window.onresize = resize;
 resize();
