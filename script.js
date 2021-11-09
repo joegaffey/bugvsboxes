@@ -95,8 +95,8 @@ var isBrake = false;
 Events.on(runner, "beforeTick", function(event) {
   if(!GAME_RUNNING)
     return;
-  if (keys[90] || keys[37] || isBrake) { car.brake(); };
-  if (keys[88] || keys[39] || isAccel) { car.accel(); };
+  if (keys[90] || keys[37] || isAccel) { car.accel(); };
+  if (keys[88] || keys[39] || isBrake) { car.brake(); };
   updateBoxes();
   updateCar();
 });
@@ -314,7 +314,7 @@ var isBrake = false,
 containerEl.addEventListener('pointerdown', (e) => { 
   if(GAME_RUNNING)
     move(e.clientX); 
-  else if(isInside(getButtonDims(uiData.button.label), {x: e.clientX, y: e.clientY}))
+  else if(isInside(getButtonDims(uiData.button.label), {x: e.clientX, y: e.clientY}, e))
     uiData.button.action.call();
 }, false);
 containerEl.addEventListener('pointerup', (e) => { stop() }, false);
@@ -326,18 +326,30 @@ containerEl.addEventListener('pointermove', (e) => {
   }
 }, false);
 
-function isInside(box, point) {
-  var x, y;
-  if(ctx.canvas.clientWidth <= 800) {
-    x = point.x / ctx.canvas.clientWidth * 800;
-    y = point.y / ctx.canvas.clientHeight * 600;
+// Thanks! https://newbedev.com/real-mouse-position-in-canvas
+function getScaledPos(canvas, evt) {
+  var rect = canvas.getBoundingClientRect(), // abs. size of element
+      scaleX = canvas.width / rect.width,    // relationship bitmap vs. element for X
+      scaleY = canvas.height / rect.height;  // relationship bitmap vs. element for Y
+
+  return {
+    x: (evt.clientX - rect.left) * scaleX,   // scale mouse coordinates after they have
+    y: (evt.clientY - rect.top) * scaleY     // been adjusted to be relative to element
   }
-  else {
-    x = 800 / ctx.canvas.clientWidth * point.x;
-    y = 600 / ctx.canvas.clientHeight * point.y;
-  }
-  if(x > box.x && x < box.x + box.width &&
-     y > box.y && y < box.y + box.height)
+}
+
+function isInside(box, point, e) {
+  // if(ctx.canvas.clientWidth <= 800) {
+  //   x = point.x / ctx.canvas.clientWidth * 800;
+  //   y = point.y / ctx.canvas.clientHeight * 600;
+  // }
+  // else {
+  //   x = 800 / ctx.canvas.clientWidth * point.x;
+  //   y = 600 / ctx.canvas.clientHeight * point.y;
+  // }
+  var p = getScaledPos(ctx.canvas, e);
+  if(p.x > box.x && p.x < box.x + box.width &&
+     p.y > box.y && p.y < box.y + box.height)
     return true;
   else 
     return false;
@@ -350,12 +362,12 @@ function stop() {
 
 function move(x) {
   if(x > containerEl.offsetWidth / 2) {
-    isAccel = true;
-    isBrake = false;
-  }
-  else {
     isBrake = true;
     isAccel = false;
+  }
+  else {
+    isAccel = true;
+    isBrake = false;
   }
 }
 

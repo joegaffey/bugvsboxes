@@ -101,12 +101,18 @@ const Car = function(xx, yy, width, height, wheelSize) {
     length: 0
   });
   
-  car.accel = function() {
+  car.brake = function() {
     wheelB.torque += 0.15;
+    if(wheelA.position.x < 10) {
+      wheelB.torque += 0.15;
+    }
   }
   
-  car.brake = function() {
+  car.accel = function() {
     wheelB.torque -= 0.15;
+    if(wheelB.position.x > 790) {
+      wheelA.torque -= 0.15;
+    }
   }
 
   Composite.addBody(car, body);
