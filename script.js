@@ -36,18 +36,6 @@ var render = Render.create({
   }
 });
 
-var crateOptions = { 
-  friction: 0.001,
-  render: {
-    strokeStyle: '#00ff00',
-    sprite: {
-      texture: Assets.path + 'crate.png',
-      xScale: 0.32,
-      yScale: 0.32,
-    }
-  }
-};     
-
 // create a ground
 var groundOptions = { 
   isStatic: true,  
@@ -290,9 +278,39 @@ function getButtonDims(text) {
   }
 }
 
+var crateOptions = { 
+  friction: 0.001,
+  render: {
+    strokeStyle: '#00ff00',
+    sprite: {
+      texture: Assets.path + 'crate.png',
+      xScale: 0.32,
+      yScale: 0.32,
+    }
+  }
+};     
+
+var smallCrateOptions = { 
+  friction: 0.001,
+  render: {
+    strokeStyle: '#00ff00',
+    sprite: {
+      texture: Assets.path + 'crate.png',
+      xScale: 0.24,
+      yScale: 0.24,
+    }
+  }
+};
+
 function addBox() {
   if(level.remaining > 0 && boxes.length < level.MAX_BOXES &&  GAME_RUNNING) {
-    let box = Bodies.rectangle(30 + Math.random() * 740, 0, 80, 80, crateOptions);
+    let box;
+    
+    if((Math.random() * level.SIZES.LARGE) >= (Math.random() * level.SIZES.SMALL))
+      box = Bodies.rectangle(30 + Math.random() * 740, 0, 80, 80, crateOptions);
+    else
+      box = Bodies.rectangle(30 + Math.random() * 740, 0, 60, 60, smallCrateOptions);
+    
     Body.rotate(box, Math.random());
     boxes.push(box);
     Composite.add(engine.world, [box]);
