@@ -6,7 +6,8 @@ var levels = [{
     VAR_RATE: 5000,
     MIN_RATE: 1000,
     BOXES: 10,
-    SIZES: { SMALL: 10, LARGE: 0 }
+    SIZES: { SMALL: 10, LARGE: 0 },
+    SAY_COMPLETE: 'wohoo'
   },
   { 
     NUMBER: 2,
@@ -16,7 +17,8 @@ var levels = [{
     VAR_RATE: 4000,
     MIN_RATE: 800,
     BOXES: 15,
-    SIZES: { SMALL: 9, LARGE: 1 }
+    SIZES: { SMALL: 9, LARGE: 1 },
+    SAY_COMPLETE: 'yes'
   },
   {
     NUMBER: 3,
@@ -26,7 +28,8 @@ var levels = [{
     VAR_RATE: 3000,
     MIN_RATE: 700,
     BOXES: 25,
-    SIZES: { SMALL: 8, LARGE: 2 }
+    SIZES: { SMALL: 8, LARGE: 2 },
+    SAY_COMPLETE: 'finished'
   },
   { 
     NUMBER: 4,
@@ -36,7 +39,8 @@ var levels = [{
     VAR_RATE: 2000,
     MIN_RATE: 500,
     BOXES: 35,
-    SIZES: { SMALL: 7, LARGE: 3 }
+    SIZES: { SMALL: 7, LARGE: 3 },
+    SAY_COMPLETE: 'phew'
   },
   { 
     NUMBER: 5,
@@ -46,7 +50,8 @@ var levels = [{
     VAR_RATE: 1500,
     MIN_RATE: 500,
     BOXES: 40,
-    SIZES: { SMALL: 6, LARGE: 4 }
+    SIZES: { SMALL: 6, LARGE: 4 },
+    SAY_COMPLETE: 'noice'
   },
   { 
     NUMBER: 6,
@@ -56,7 +61,8 @@ var levels = [{
     VAR_RATE: 1000,
     MIN_RATE: 500,
     BOXES: 45,
-    SIZES: { SMALL: 5, LARGE: 5 }
+    SIZES: { SMALL: 5, LARGE: 5 },
+    SAY_COMPLETE: 'finished'
   } 
 ];
 

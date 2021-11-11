@@ -27,7 +27,7 @@ const Car = function(xx, yy, width, height, wheelSize) {
   const bodyTexture = Assets.path + 'bug.png';
   const wheelTexture = Assets.path + 'wheel.png';
   
-  const car = Composite.create({ label: 'Car' });   
+  const car = Composite.create({ label: 'car' });   
   
   const bodyVertices = [
     { "x":9, "y":72 }, { "x":3, "y":78 }, { "x":4, "y":93 }, { "x":18, "y":98 }, { "x":33, "y":98 }, { "x":17, "y":77 },
@@ -63,12 +63,12 @@ const Car = function(xx, yy, width, height, wheelSize) {
     },
     friction: 0.4,
     render: {
-          sprite: {
-            texture: wheelTexture,
-            xScale: 0.2,
-            yScale: 0.2,
-          }
-        }
+      sprite: {
+        texture: wheelTexture,
+        xScale: 0.2,
+        yScale: 0.2,
+      }
+    }
   });
 
   const wheelB = Bodies.circle(xx + wheelBOffset, yy + wheelYOffset, wheelSize, { 
@@ -77,12 +77,12 @@ const Car = function(xx, yy, width, height, wheelSize) {
     },
     friction: 0.4,
     render: {
-          sprite: {
-            texture: wheelTexture,
-            xScale: 0.2,
-            yScale: 0.2
-          }
-        }
+      sprite: {
+        texture: wheelTexture,
+        xScale: 0.2,
+        yScale: 0.2
+      }
+    }
   });
 
   const axelA = Constraint.create({
