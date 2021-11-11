@@ -1,8 +1,11 @@
+// @TODO Investigate problem with Car class structure using Matter
+// import Car from './Car.js';   
+
 import Matter from './matter.js';
 import Car from './matter-car.js';
-// import Car from './Car.js';   // @TODO Investigate problem with class structure using Matter
 import Assets from './assets.js';
 import levels from './levels.js';
+import audio from './audio.js';
 
 // module aliases
 var Engine = Matter.Engine,
@@ -12,6 +15,7 @@ var Engine = Matter.Engine,
     Body = Matter.Body,
     Composite = Matter.Composite,
     Composites = Matter.Composites,
+    Vector = Matter.Vector,
     Events = Matter.Events;
 
 var containerEl = document.querySelector('#matter');
@@ -20,7 +24,10 @@ var uiData = {
   message: ['', 'Clear the boxes!', 'Don\'t fall off the platform!'],
   button: {
     label: 'Ok',
-    action: () => showLevel(0)
+    action: () => {
+      audio.init();
+      showLevel(0);
+    }
   }
 }
 
@@ -38,6 +45,7 @@ var render = Render.create({
 
 // create a ground
 var groundOptions = { 
+  label: 'ground',
   isStatic: true,  
   render: { 
     fillStyle: '#338833'
@@ -80,6 +88,7 @@ var runner = Runner.create();
 Runner.run(runner, engine);
 var isAccel = false;
 var isBrake = false;
+
 Events.on(runner, "beforeTick", function(event) {
   if(!GAME_RUNNING)
     return;
@@ -92,6 +101,31 @@ Events.on(runner, "beforeTick", function(event) {
 var level = levels[0];
 var GAME_RUNNING = false;
 var boxes = [];
+
+var GROUND = 'ground';
+var CAR = 'Body';
+var BOX = 'box';
+
+Events.on(engine, 'collisionStart', function(event) {
+  let doCollision = false;
+  let magMax = 0;
+  event.pairs.forEach((pair) => {
+    let massA = pair.bodyA.mass;
+    if(massA === Infinity) massA = 10000;
+    let massB = pair.bodyB.mass;
+    if(massB === Infinity) massB = 10000;
+    const bodyAMomentum = Vector.mult(pair.bodyA.velocity, massA);
+    const bodyBMomentum = Vector.mult(pair.bodyB.velocity, massB);
+    const relativeMomentum = Vector.sub(bodyAMomentum, bodyBMomentum);
+    const mag = Vector.magnitude(relativeMomentum);
+    const threshold = 2;
+    // console.log(mag)
+    if(mag > threshold) doCollision = true;
+    if(mag > magMax) magMax = mag;
+  });
+  if(doCollision)
+    audio.kick(magMax / 50)
+});
 
 function pause() {
   if(GAME_RUNNING) {
@@ -138,11 +172,18 @@ function startLevel(num) {
 
 function endGame(code) {
   level = levels[0];
-  var message = ['','Congratulations!', 'You finshed the game!!!']
-  if(code === 1)
-    message = ['','Platform limit exceeded!' , 'Game over!']
-  if(code === 2)
-    message = ['','You fell to your doom!!!', 'Game over!']
+  var message = ['','Congratulations!', 'You finshed the game!!!'];
+  if(code === 0) {
+    audio.say('finished at last');
+  }
+  if(code === 1) {
+    message = ['','Platform limit exceeded!' , 'Game over!'];
+    audio.say('so sad');
+  }
+  if(code === 2) {
+    message = ['','You fell to your doom!!!', 'Game over!'];
+    audio.say('Oh noes');
+  }
   uiData = {
     message: message,
     button: {
@@ -235,7 +276,7 @@ function updateCar() {
 function levelComplete() {
   level = levels[level.NUMBER];
   showLevel();
-  console.log(level)
+  audio.say(level.SAY_COMPLETE);
   runner.enabled = false;
   GAME_RUNNING = false;
 }
@@ -279,6 +320,7 @@ function getButtonDims(text) {
 }
 
 var crateOptions = { 
+  label: 'box',
   friction: 0.001,
   render: {
     strokeStyle: '#00ff00',
@@ -290,7 +332,8 @@ var crateOptions = {
   }
 };     
 
-var smallCrateOptions = { 
+var smallCrateOptions = {
+  label: 'box',
   friction: 0.001,
   render: {
     strokeStyle: '#00ff00',
