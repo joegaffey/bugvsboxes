@@ -325,34 +325,36 @@ var crateOptions = {
   render: {
     strokeStyle: '#00ff00',
     sprite: {
-      texture: Assets.path + 'crate.png',
-      xScale: 0.32,
-      yScale: 0.32,
-    }
-  }
-};     
-
-var smallCrateOptions = {
-  label: 'box',
-  friction: 0.001,
-  render: {
-    strokeStyle: '#00ff00',
-    sprite: {
-      texture: Assets.path + 'crate.png',
-      xScale: 0.24,
-      yScale: 0.24,
+      texture: Assets.path + 'crate.png'
     }
   }
 };
+
+var smallCrateOptions = JSON.parse(JSON.stringify(crateOptions));
+smallCrateOptions.render.sprite.xScale = 0.24;
+smallCrateOptions.render.sprite.yScale = 0.24;
+
+var mediumCrateOptions = JSON.parse(JSON.stringify(crateOptions));
+mediumCrateOptions.render.sprite.xScale = 0.32;
+mediumCrateOptions.render.sprite.yScale = 0.32;
+
+var largeCrateOptions = JSON.parse(JSON.stringify(crateOptions));
+largeCrateOptions.render.sprite.xScale = 0.4;
+largeCrateOptions.render.sprite.yScale = 0.4;
 
 function addBox() {
   if(level.remaining > 0 && boxes.length < level.MAX_BOXES &&  GAME_RUNNING) {
     let box;
     
-    if((Math.random() * level.SIZES.LARGE) >= (Math.random() * level.SIZES.SMALL))
-      box = Bodies.rectangle(30 + Math.random() * 740, 0, 80, 80, crateOptions);
-    else
+    let sm = Math.random() * level.SIZES.LARGE,
+      md = Math.random() * level.SIZES.MEDIUM,
+      lg = Math.random() * level.SIZES.SMALL;
+    if(lg > md && lg > sm) 
       box = Bodies.rectangle(30 + Math.random() * 740, 0, 60, 60, smallCrateOptions);
+    else if(md > lg && md > sm)
+      box = Bodies.rectangle(30 + Math.random() * 740, 0, 80, 80, mediumCrateOptions);
+    else
+      box = Bodies.rectangle(30 + Math.random() * 740, 0, 100, 100, largeCrateOptions);
     
     Body.rotate(box, Math.random());
     boxes.push(box);
