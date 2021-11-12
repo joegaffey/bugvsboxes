@@ -105,6 +105,8 @@ var boxes = [];
 var GROUND = 'ground';
 var CAR = 'Body';
 var BOX = 'box';
+var platformLoad = 0;
+var LOAD_RATIO = 30;
 
 Events.on(engine, 'collisionStart', function(event) {
   let doCollision = false;
@@ -125,6 +127,22 @@ Events.on(engine, 'collisionStart', function(event) {
   });
   if(doCollision)
     audio.kick(magMax / 50)
+});
+
+Events.on(engine, 'collisionActive', function(event) {
+  const platformBoxes = [];
+  let totalWeight = 0;
+  event.pairs.forEach((pair) => {
+    boxes.forEach((box) => {
+      if(pair.bodyA === box || pair.bodyB === box)
+        if(platformBoxes.indexOf(box) < 0)
+          platformBoxes.push(box);
+    });
+  });
+  platformBoxes.forEach((box) => {
+    totalWeight += box.mass;
+  });
+  platformLoad = totalWeight * 10;
 });
 
 function pause() {
@@ -154,7 +172,7 @@ function showLevel() {
     message: [
       'Level ' + level.NUMBER, 
       'Clear ' + level.BOXES + ' boxes',
-      'Platform Limit: ' + level.MAX_BOXES + ' boxes',
+      'Platform Weight Limit: ' + level.MAX_BOXES * LOAD_RATIO + 'kg',
     ],
     button: {
       label: 'Go!',
@@ -171,7 +189,6 @@ function startLevel(num) {
 }
 
 function endGame(code) {
-  level = levels[0];
   var message = ['','Congratulations!', 'You finshed the game!!!'];
   if(code === 0) {
     audio.say('finished at last');
@@ -220,11 +237,11 @@ Events.on(render, "afterRender", () => {
 
 function renderHUD() {
   var color = '#44AA44';
-  if(boxes.length > level.DANGER_BOXES) {
+  if(platformLoad > level.DANGER_BOXES * LOAD_RATIO) {
     color = '#ff0000';
     messageText = 'DANGER!'; 
   }
-  else if(boxes.length > level.WARN_BOXES) {
+  else if(platformLoad > level.WARN_BOXES * LOAD_RATIO) {
     color = 'orange';
     messageText = 'WARNING!';
   }
@@ -241,15 +258,16 @@ function renderHUD() {
   ctx.shadowOffsetX = 2;
   ctx.shadowOffsetY = 2;
   ctx.textAlign = 'center';
-  ctx.fillText(boxes.length + '/' + level.MAX_BOXES, 75, 50);
+  ctx.fillText(Math.round(platformLoad) + '/' 
+               + level.MAX_BOXES * LOAD_RATIO + 'kg', 150, 50);
   ctx.fillText(messageText, 400, 50);
-  ctx.fillText(level.remaining, 750, 50);
+  ctx.fillText(level.remaining + boxes.length, 750, 50);
   ctx.restore();
 }
 
 
 function updateBoxes() {
-  if(boxes.length >= level.MAX_BOXES) {
+  if(platformLoad >= level.MAX_BOXES * LOAD_RATIO) {
     endGame(1);
     return;
   }
@@ -282,6 +300,8 @@ function levelComplete() {
 }
 
 function restart() {
+  level = levels[0];
+  platformLoad = 0;
   Composite.clear(engine.world);
   Engine.clear(engine);
   setupWorld();
@@ -402,14 +422,6 @@ function getScaledPos(canvas, evt) {
 }
 
 function isInside(box, point, e) {
-  // if(ctx.canvas.clientWidth <= 800) {
-  //   x = point.x / ctx.canvas.clientWidth * 800;
-  //   y = point.y / ctx.canvas.clientHeight * 600;
-  // }
-  // else {
-  //   x = 800 / ctx.canvas.clientWidth * point.x;
-  //   y = 600 / ctx.canvas.clientHeight * point.y;
-  // }
   var p = getScaledPos(ctx.canvas, e);
   if(p.x > box.x && p.x < box.x + box.width &&
      p.y > box.y && p.y < box.y + box.height)
