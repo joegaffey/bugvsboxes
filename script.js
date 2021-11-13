@@ -3,74 +3,122 @@
 
 import Matter from './matter.js';
 import Car from './matter-car.js';
-import Assets from './assets.js';
+import assets from './assets.js';
 import levels from './levels.js';
 import audio from './audio.js';
+import gui from './gui.js';
+import settings from './settings.js';
+import hud from './hud.js';
 
 // module aliases
-var Engine = Matter.Engine,
-    Render = Matter.Render,
-    Runner = Matter.Runner,
-    Bodies = Matter.Bodies,
-    Body = Matter.Body,
-    Composite = Matter.Composite,
-    Composites = Matter.Composites,
-    Vector = Matter.Vector,
-    Events = Matter.Events;
+const Engine = Matter.Engine,
+  Render = Matter.Render,
+  Runner = Matter.Runner,
+  Bodies = Matter.Bodies,
+  Body = Matter.Body,
+  Composite = Matter.Composite,
+  Composites = Matter.Composites,
+  Vector = Matter.Vector,
+  Events = Matter.Events;
 
-var containerEl = document.querySelector('#matter');
-
-var uiData = {
-  message: ['', 'Clear the boxes!', 'Don\'t fall off the platform!'],
-  button: {
-    label: 'Ok',
-    action: () => {
-      audio.init();
-      showLevel(0);
-    }
-  }
-}
+const containerEl = document.querySelector('#matter');
 
 // create an engine
-var engine = Engine.create();
+const engine = Engine.create();
 
-var render = Render.create({
+const render = Render.create({
   element: containerEl,
   engine: engine,
-  options: {
-    wireframes: false,
-    background: 'url(' + Assets.path + 'blue_sky.png)'
-  }
+  options: settings.CONTAINER_OPTIONS
 });
 
-// create a ground
-var groundOptions = { 
-  label: 'ground',
-  isStatic: true,  
-  render: { 
-    fillStyle: '#338833'
-  }
-};
+// run the renderer
+Render.run(render);
 
-var scale = 0.9;
-var ground, car;
+// create runner
+const runner = Runner.create();
 
-function setupWorld() {
-  ground = Bodies.rectangle(400, 610, 780, 50, groundOptions);
-  car = Composite.create(new Car(400, 530, 300 * scale, 50 * scale, 30 * scale));
-  Composite.add(engine.world, [car, ground]);
-}
+// run the engine
+Runner.run(runner, engine);
+
+let car;
 setupWorld();
 
-var keys = [];
+const gState = {
+  platformLoad: 0,
+  isAccel: false,
+  isBrake: false,
+  boxes: [],
+  level: levels[0],
+  messageText:'',
+  running: false
+}
+
+const ctx = render.canvas.getContext('2d');
+gui.ctx = ctx;
+hud.ctx = ctx;
+
+gui.setAction(() => {
+  audio.init();
+  gui.showLevel(gState, () => startLevel(0));
+});
+
+const grassImg = new Image();
+grassImg.src = settings.GRASS_TEXTURE;
+grassImg.onload =  () =>  {
+  const tempCanvas = document.createElement("canvas"),
+  tCtx = tempCanvas.getContext("2d");
+  tempCanvas.width = grassImg.width * settings.GRASS_SCALE;
+  tempCanvas.height = grassImg.height * settings.GRASS_SCALE;
+  tCtx.drawImage(grassImg, 0, 0, grassImg.width, grassImg.height, 
+                 0, 0, grassImg.width * settings.GRASS_SCALE, grassImg.height * settings.GRASS_SCALE);
+  render.grassPattern = ctx.createPattern(tempCanvas, 'repeat');
+};
+
+function setupWorld() {
+  const CAR_SCALE = 0.9;
+  const ground = Bodies.rectangle(400, 610, 780, 50, settings.GROUND_OPTIONS);
+  car = Composite.create(new Car(400, 530, 300 * CAR_SCALE, 50 *  CAR_SCALE, 30 *  CAR_SCALE));
+  Composite.add(engine.world, [car, ground]);
+}
+
+(function boxLoop() {
+  const rand = Math.round(Math.random() * (gState.level.VAR_RATE)) + gState.level.MIN_RATE;
+  setTimeout(function() {
+    addBox();
+    boxLoop();  
+  }, rand);
+}());
+
+window.onresize = resize;
+resize();
+
+/////////////////////  Controls setup  ////////////////////////////////////
+
+containerEl.addEventListener('pointerdown', (e) => { 
+  if(gState.running)
+    move(e.clientX); 
+  else 
+    gui.checkPointer(e);
+}, false);
+containerEl.addEventListener('pointerup', (e) => { stop() }, false);
+containerEl.addEventListener('pointercancel', (e) => { stop() }, false);
+containerEl.addEventListener('pointerleave', (e) => { stop() }, false);
+containerEl.addEventListener('pointermove', (e) => {
+  if(e.buttons > 0) {
+    move(e.clientX);
+  }
+}, false);
+
+const keys = [];
 document.body.addEventListener("keydown", function(e) {
   keys[e.keyCode] = true;
   e.preventDefault();
   if(keys[32] || keys[13]) {
-    if(GAME_RUNNING)
+    if(gState.running)
       pause();
     else
-      uiData.button.action.call();
+      gui.action();
   }
 });
 document.body.addEventListener("keyup", function(e) {
@@ -78,35 +126,16 @@ document.body.addEventListener("keyup", function(e) {
   e.preventDefault();
 });
 
-// run the renderer
-Render.run(render);
-
-// create runner
-var runner = Runner.create();
-
-// run the engine
-Runner.run(runner, engine);
-var isAccel = false;
-var isBrake = false;
+/////////////////////  Matter Events setup  ////////////////////////////////////
 
 Events.on(runner, "beforeTick", function(event) {
-  if(!GAME_RUNNING)
+  if(!gState.running)
     return;
-  if (keys[90] || keys[37] || isAccel) { car.accel(); };
-  if (keys[88] || keys[39] || isBrake) { car.brake(); };
+  if (keys[90] || keys[37] || gState.isAccel) { car.accel(); };
+  if (keys[88] || keys[39] || gState.isBrake) { car.brake(); };
   updateBoxes();
   updateCar();
 });
-
-var level = levels[0];
-var GAME_RUNNING = false;
-var boxes = [];
-
-var GROUND = 'ground';
-var CAR = 'Body';
-var BOX = 'box';
-var platformLoad = 0;
-var LOAD_RATIO = 30;
 
 Events.on(engine, 'collisionStart', function(event) {
   let doCollision = false;
@@ -121,7 +150,6 @@ Events.on(engine, 'collisionStart', function(event) {
     const relativeMomentum = Vector.sub(bodyAMomentum, bodyBMomentum);
     const mag = Vector.magnitude(relativeMomentum);
     const threshold = 2;
-    // console.log(mag)
     if(mag > threshold) doCollision = true;
     if(mag > magMax) magMax = mag;
   });
@@ -133,7 +161,7 @@ Events.on(engine, 'collisionActive', function(event) {
   const platformBoxes = [];
   let totalWeight = 0;
   event.pairs.forEach((pair) => {
-    boxes.forEach((box) => {
+    gState.boxes.forEach((box) => {
       if(pair.bodyA === box || pair.bodyB === box)
         if(platformBoxes.indexOf(box) < 0)
           platformBoxes.push(box);
@@ -142,148 +170,63 @@ Events.on(engine, 'collisionActive', function(event) {
   platformBoxes.forEach((box) => {
     totalWeight += box.mass;
   });
-  platformLoad = totalWeight * 10;
+  gState.platformLoad = totalWeight * 10;
 });
 
+Events.on(render, "afterRender", () => {
+  ctx.fillStyle = render.grassPattern || '#338833';
+  ctx.fillRect(10, 560, 780, 80, 40);
+  if(gState.running)
+    hud.render(gState);
+  else
+    gui.render();
+});
+
+/////////////////////   Game lifecycle  ////////////////////////////////////
+
 function pause() {
-  if(GAME_RUNNING) {
-    uiData = {
-      message: [
-        'Game Paused',
-        'Level ' + level.NUMBER, 
-        level.remaining + boxes.length + ' boxes remaining'
-      ],
-      button: {
-        label: 'Resume',
-        action: () => pause()
-      }
-    }
+  if(gState.running) {
+    gui.showPause(gState, () => pause());
     runner.enabled = false;
-    GAME_RUNNING = false;
+    gState.running = false;
   }
   else {
     runner.enabled = true;
-    GAME_RUNNING = true;
-  }
-}
-
-function showLevel() {
-  uiData = {
-    message: [
-      'Level ' + level.NUMBER, 
-      'Clear ' + level.BOXES + ' boxes',
-      'Platform Weight Limit: ' + level.MAX_BOXES * LOAD_RATIO + 'kg',
-    ],
-    button: {
-      label: 'Go!',
-      action: () => startLevel()
-    }
+    gState.running = true;
   }
 }
 
 function startLevel(num) {
-  level.remaining = level.BOXES;
-  GAME_RUNNING = true;
-  boxes = [];
+  gState.level.remaining = gState.level.BOXES;
+  gState.running = true;
+  gState.boxes = [];
   runner.enabled = true;
 }
 
 function endGame(code) {
-  var message = ['','Congratulations!', 'You finshed the game!!!'];
-  if(code === 0) {
-    audio.say('finished at last');
-  }
-  if(code === 1) {
-    message = ['','Platform limit exceeded!' , 'Game over!'];
-    audio.say('so sad');
-  }
-  if(code === 2) {
-    message = ['','You fell to your doom!!!', 'Game over!'];
-    audio.say('Oh noes');
-  }
-  uiData = {
-    message: message,
-    button: {
-      label: 'Restart',
-      action: () => restart()
-    }
-  }
+  gui.showEndScreen(code, () => restart());
   runner.enabled = false;
-  GAME_RUNNING = false;
+  gState.running = false;
 }
 
-var ctx = render.canvas.getContext('2d');
-var grassImg = new Image();
-grassImg.src = Assets.path + 'grass.png';
-grassImg.onload =  () =>  {
-  var scale = 0.27;
-  var tempCanvas = document.createElement("canvas"),
-  tCtx = tempCanvas.getContext("2d");
-  tempCanvas.width = grassImg.width * scale;
-  tempCanvas.height = grassImg.height * scale;
-  tCtx.drawImage(grassImg, 0, 0, grassImg.width, grassImg.height, 0, 0,  grassImg.width * scale,  grassImg.height * scale);
-  render.grassPattern = ctx.createPattern(tempCanvas, 'repeat');
-};
-
-var messageText = '';
-Events.on(render, "afterRender", () => {
-  ctx.fillStyle = render.grassPattern || '#338833';
-  ctx.fillRect(10, 560, 780, 80, 40);
-  if(GAME_RUNNING)
-    renderHUD();
-  else
-    showGUI();
-});
-
-function renderHUD() {
-  var color = '#44AA44';
-  if(platformLoad > level.DANGER_BOXES * LOAD_RATIO) {
-    color = '#ff0000';
-    messageText = 'DANGER!'; 
-  }
-  else if(platformLoad > level.WARN_BOXES * LOAD_RATIO) {
-    color = 'orange';
-    messageText = 'WARNING!';
-  }
-  else {
-    if((level.BOXES - level.remaining) < 5)
-      messageText = 'Level ' + level.NUMBER;
-    else
-      messageText = '';
-  }
-  ctx.save();
-  ctx.font = 'bold 30px Verdana';
-  ctx.fillStyle = color;
-  ctx.shadowColor = '#555'
-  ctx.shadowOffsetX = 2;
-  ctx.shadowOffsetY = 2;
-  ctx.textAlign = 'center';
-  ctx.fillText(Math.round(platformLoad) + '/' 
-               + level.MAX_BOXES * LOAD_RATIO + 'kg', 150, 50);
-  ctx.fillText(messageText, 400, 50);
-  ctx.fillText(level.remaining + boxes.length, 750, 50);
-  ctx.restore();
+function endLevel() {
+  gState.level = levels[gState.level.NUMBER];
+  gui.showLevel(gState, () => startLevel(gState.level.NUMBER));
+  audio.say(gState.level.SAY_COMPLETE);
+  runner.enabled = false;
+  gState.running = false;
 }
 
-
-function updateBoxes() {
-  if(platformLoad >= level.MAX_BOXES * LOAD_RATIO) {
-    endGame(1);
-    return;
-  }
-  boxes.forEach((box, i) => {
-    if(box.position.y > 1000) {
-      box = null;
-      boxes.splice(i, 1);
-    }
-  });
-  if(level.remaining === 0 && boxes.length === 0) {
-    if(level.NUMBER >= levels.length)
-      endGame(0); 
-    else
-      levelComplete();
-  }
+function restart() {
+  gState.level = levels[0];
+  gState.platformLoad = 0;
+  Composite.clear(engine.world);
+  Engine.clear(engine);
+  setupWorld();
+  gui.showLevel(gState, () => startLevel(0))
 }
+
+///////////////////////// Object updates ////////////////////////////
 
 function updateCar() {
   if(car.bodies[0].position.y > 1000) {
@@ -291,173 +234,90 @@ function updateCar() {
   }
 }
 
-function levelComplete() {
-  level = levels[level.NUMBER];
-  showLevel();
-  audio.say(level.SAY_COMPLETE);
-  runner.enabled = false;
-  GAME_RUNNING = false;
-}
-
-function restart() {
-  level = levels[0];
-  platformLoad = 0;
-  Composite.clear(engine.world);
-  Engine.clear(engine);
-  setupWorld();
-  showLevel(0)
-}
-
-function showGUI() {
-  ctx.save();
-  ctx.shadowColor = '#333'
-  ctx.shadowOffsetX = 2;
-  ctx.shadowOffsetY = 2;
-  ctx.fillStyle = 'lightgray'
-  ctx.fillRect(100, 150, 600, 300);
-  ctx.font = 'bold 30px Verdana';
-  ctx.fillStyle = '#888';
-  ctx.textAlign = 'center';
-  uiData.message.forEach((line, i, arr) => {
-    ctx.fillText(line, 400, 200 + i * 50);
-  });
-  ctx.fillStyle = 'darkgrey';
-  var d = getButtonDims(uiData.button.label);
-  ctx.fillRect(d.x, d.y, d.width, d.height);
-  ctx.fillStyle = 'lightgray';
-  ctx.fillText(uiData.button.label, 400, 400);
-  ctx.restore();  
-}
-
-function getButtonDims(text) {
-  var width = text.length * 25 + 30;
-  return {
-    x: (800 - width) / 2,
-    y: 365,
-    width: width,
-    height: 50
+function updateBoxes() {
+  if(gState.platformLoad >= gState.level.MAX_BOXES * settings.LOAD_RATIO) {
+    endGame(1);
+    return;
   }
-}
-
-var crateOptions = { 
-  label: 'box',
-  friction: 0.001,
-  render: {
-    strokeStyle: '#00ff00',
-    sprite: {
-      texture: Assets.path + 'crate.png'
+  gState.boxes.forEach((box, i) => {
+    if(box.position.y > 1000) {
+      box = null;
+      gState.boxes.splice(i, 1);
     }
+  });
+  if(gState.level.remaining === 0 && gState.boxes.length === 0) {
+    if(gState.level.NUMBER >= levels.length)
+      endGame(0); 
+    else
+      endLevel();
   }
-};
-
-var smallCrateOptions = JSON.parse(JSON.stringify(crateOptions));
-smallCrateOptions.render.sprite.xScale = 0.24;
-smallCrateOptions.render.sprite.yScale = 0.24;
-
-var mediumCrateOptions = JSON.parse(JSON.stringify(crateOptions));
-mediumCrateOptions.render.sprite.xScale = 0.32;
-mediumCrateOptions.render.sprite.yScale = 0.32;
-
-var largeCrateOptions = JSON.parse(JSON.stringify(crateOptions));
-largeCrateOptions.render.sprite.xScale = 0.4;
-largeCrateOptions.render.sprite.yScale = 0.4;
+}
 
 function addBox() {
-  if(level.remaining > 0 && boxes.length < level.MAX_BOXES &&  GAME_RUNNING) {
+  const smallCrateOptions = JSON.parse(JSON.stringify(settings.BOX_OPTIONS));
+  smallCrateOptions.render.sprite.xScale = settings.SMALL_BOX_SCALE;
+  smallCrateOptions.render.sprite.yScale = settings.SMALL_BOX_SCALE;
+
+  const mediumCrateOptions = JSON.parse(JSON.stringify(settings.BOX_OPTIONS));
+  mediumCrateOptions.render.sprite.xScale = settings.MEDIUM_BOX_SCALE;
+  mediumCrateOptions.render.sprite.yScale = settings.MEDIUM_BOX_SCALE;
+
+  const largeCrateOptions = JSON.parse(JSON.stringify(settings.BOX_OPTIONS));
+  largeCrateOptions.render.sprite.xScale = settings.LARGE_BOX_SCALE;
+  largeCrateOptions.render.sprite.yScale = settings.LARGE_BOX_SCALE;
+
+  if(gState.level.remaining > 0 && gState.boxes.length < gState.level.MAX_BOXES &&  gState.running) {
     let box;
     
-    let sm = Math.random() * level.SIZES.LARGE,
-      md = Math.random() * level.SIZES.MEDIUM,
-      lg = Math.random() * level.SIZES.SMALL;
+    let sm = Math.random() * gState.level.SIZES.LARGE,
+      md = Math.random() * gState.level.SIZES.MEDIUM,
+      lg = Math.random() * gState.level.SIZES.SMALL;
+    let s = settings.SMALL_BOX_SIZE, m = settings.MEDIUM_BOX_SIZE, l = settings.LARGE_BOX_SIZE
+    let x1 = settings.DROP_MIN_X, x2 = settings.DROP_MAX_X, y = settings.DROP_Y;
     if(lg > md && lg > sm) 
-      box = Bodies.rectangle(30 + Math.random() * 740, 0, 60, 60, smallCrateOptions);
+      box = Bodies.rectangle(x1 + Math.random() * x2, y, s, s, smallCrateOptions);
     else if(md > lg && md > sm)
-      box = Bodies.rectangle(30 + Math.random() * 740, 0, 80, 80, mediumCrateOptions);
+      box = Bodies.rectangle(x1 + Math.random() * x2, y, m, m, mediumCrateOptions);
     else
-      box = Bodies.rectangle(30 + Math.random() * 740, 0, 100, 100, largeCrateOptions);
+      box = Bodies.rectangle(x1 + Math.random() * x2, y, l, l, largeCrateOptions);
     
     Body.rotate(box, Math.random());
-    boxes.push(box);
+    gState.boxes.push(box);
     Composite.add(engine.world, [box]);
-    level.remaining--;
+    gState.level.remaining--;
   }
 }
 
-(function boxLoop() {
-    var rand = Math.round(Math.random() * (level.VAR_RATE)) + level.MIN_RATE;
-    setTimeout(function() {
-      addBox();
-      boxLoop();  
-    }, rand);
-}());
-
-var isBrake = false, 
-    isAccel = false;
-
-containerEl.addEventListener('pointerdown', (e) => { 
-  if(GAME_RUNNING)
-    move(e.clientX); 
-  else if(isInside(getButtonDims(uiData.button.label), {x: e.clientX, y: e.clientY}, e))
-    uiData.button.action.call();
-}, false);
-containerEl.addEventListener('pointerup', (e) => { stop() }, false);
-containerEl.addEventListener('pointercancel', (e) => { stop() }, false);
-containerEl.addEventListener('pointerleave', (e) => { stop() }, false);
-containerEl.addEventListener('pointermove', (e) => {
-  if(e.buttons > 0) {
-    move(e.clientX);
-  }
-}, false);
-
-// Thanks! https://newbedev.com/real-mouse-position-in-canvas
-function getScaledPos(canvas, evt) {
-  var rect = canvas.getBoundingClientRect(), // abs. size of element
-      scaleX = canvas.width / rect.width,    // relationship bitmap vs. element for X
-      scaleY = canvas.height / rect.height;  // relationship bitmap vs. element for Y
-
-  return {
-    x: (evt.clientX - rect.left) * scaleX,   // scale mouse coordinates after they have
-    y: (evt.clientY - rect.top) * scaleY     // been adjusted to be relative to element
-  }
-}
-
-function isInside(box, point, e) {
-  var p = getScaledPos(ctx.canvas, e);
-  if(p.x > box.x && p.x < box.x + box.width &&
-     p.y > box.y && p.y < box.y + box.height)
-    return true;
-  else 
-    return false;
-}
+///////////////////////// Car controls ////////////////////////////
 
 function stop() {
-  isAccel = false;
-  isBrake = false;
+  gState.isAccel = false;
+  gState.isBrake = false;
 }
 
 function move(x) {
   if(x > containerEl.offsetWidth / 2) {
-    isBrake = true;
-    isAccel = false;
+    gState.isBrake = true;
+    gState.isAccel = false;
   }
   else {
-    isAccel = true;
-    isBrake = false;
+    gState.isAccel = true;
+    gState.isBrake = false;
   }
 }
 
+///////////////////////// View mgt ////////////////////////////
+
 function resize() {
-  if (window.innerWidth >= window.innerHeight * 1.333) {
-    var h = window.innerHeight;
-    var w = window.innerHeight * 1.333;
+  let w, h;
+  if (window.innerWidth >= window.innerHeight * settings.SCREEN_RATIO) {
+    w = window.innerHeight * settings.SCREEN_RATIO;
+    h = window.innerHeight;
   } 
   else {
-    var w = window.innerWidth;
-    var h = window.innerWidth / 1.333;
+    w = window.innerWidth;
+    h = window.innerWidth / settings.SCREEN_RATIO;
   }
   render.canvas.style.width = w + 'px';
   render.canvas.style.height = h + 'px';
 }
-
-window.onresize = resize;
-resize();
