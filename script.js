@@ -105,7 +105,9 @@ containerEl.addEventListener('pointerup', (e) => { stop() }, false);
 containerEl.addEventListener('pointercancel', (e) => { stop() }, false);
 containerEl.addEventListener('pointerleave', (e) => { stop() }, false);
 containerEl.addEventListener('pointermove', (e) => {
-  if(e.buttons > 0) {
+  if(e.pointerType === 'touch')
+    move(e.clientX);
+  else if(e.pointerType === 'mouse' && e.buttons > 0) {
     move(e.clientX);
   }
 }, false);
