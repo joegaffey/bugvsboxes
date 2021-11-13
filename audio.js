@@ -1,5 +1,4 @@
 //Code from https://www.redblobgames.com/x/1618-webaudio/
-
 var context = null;
 var audio = {};
 

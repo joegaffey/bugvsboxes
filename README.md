@@ -1,13 +1,22 @@
-# Bug Vs Boxes
+# Bug vs. Boxes
 
-Keep the boxes off the platform.
+Keep the boxes off the platform.  
+GitHub [GameOff](https://itch.io/jam/game-off-2021) 2021 entry.
 
-Play [here](http://bugvsboxes.glitch.me/)!
+Play [here](https://bugvsboxes.glitch.me/) or [here](https://joegaffey.itch.io/bugvsboxes)!
 
-Controls:
-Mouse, touch or arrow keys (also z,x).
+## Controls
+Mouse, touch or keyboard (arrow keys or z & x).
 
-Matter.js car physics test.
+## Features
 
-Game Off 2021 submission.
-
+✅  Advanced physics simulation (matter.js)  
+🚧  Physics based audio  
+✅  Keyboard and mouse controls  
+🚧  Touch controls  
+⏳  Installable PWA  
+⏳  Gamepad controls  
+⏳  Haptics  
+🚧  Lady bug to English translation  
+⏳  Lady bug language i18n  
+⏳  Power ups  

@@ -1,5 +1,5 @@
 import Matter from './matter.js';
-import Assets from './assets.js';
+import assets from './assets.js';
 
 /**
 * Creates a composite with simple car setup of bodies and constraints.
@@ -24,8 +24,8 @@ const Car = function(xx, yy, width, height, wheelSize) {
       wheelBOffset = +80,
       wheelYOffset = 22;
 
-  const bodyTexture = Assets.path + 'bug.png';
-  const wheelTexture = Assets.path + 'wheel.png';
+  const bodyTexture = assets.path + 'bug.png';
+  const wheelTexture = assets.path + 'wheel.png';
   
   const car = Composite.create({ label: 'car' });   
   
