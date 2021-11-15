@@ -58,10 +58,9 @@ const ctx = render.canvas.getContext('2d');
 gui.ctx = ctx;
 hud.ctx = ctx;
 
-gui.setAction(() => {
-  audio.init();
+gui.data.nextAction = () => {
   gui.showLevel(gState, () => startLevel(0));
-});
+};
 
 const grassImg = new Image();
 grassImg.src = settings.GRASS_TEXTURE;
@@ -156,7 +155,7 @@ Events.on(engine, 'collisionStart', function(event) {
     if(mag > magMax) magMax = mag;
   });
   if(doCollision)
-    audio.kick(magMax / 50)
+    audio.kick(magMax / 25)
 });
 
 Events.on(engine, 'collisionActive', function(event) {
@@ -184,7 +183,7 @@ Events.on(render, "afterRender", () => {
     gui.render();
 });
 
-/////////////////////   Game lifecycle  ////////////////////////////////////
+/////////////////////  Game lifecycle  ////////////////////////////////////
 
 function pause() {
   if(gState.running) {
@@ -212,9 +211,11 @@ function endGame(code) {
 }
 
 function endLevel() {
+  const message = gState.level.SAY_COMPLETE;
   gState.level = levels[gState.level.NUMBER];
-  gui.showLevel(gState, () => startLevel(gState.level.NUMBER));
-  audio.say(gState.level.SAY_COMPLETE);
+  gui.showMessage(message, () => {
+    gui.showLevel(gState, () => startLevel(gState.level.NUMBER));
+  });
   runner.enabled = false;
   gState.running = false;
 }

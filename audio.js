@@ -7,7 +7,7 @@ function adsr(T, a, d, s, r, sustain) {
   function set(v, t) { gain.gain.linearRampToValueAtTime(v, T + t); }
   set(0.0, -T);
   set(0.0, 0);
-  set(1.0, a);
+  set(0.1, a);
   set(sustain, a + d);
   set(sustain, a + d + s);
   set(0.0, a + d + s + r);
@@ -17,7 +17,8 @@ function adsr(T, a, d, s, r, sustain) {
 function tweet(freq, offset) {
   if(context) {
     var T = context.currentTime;
-    var gain = adsr(T + offset + 0.03, 0.01, 0.08, 0, 0, 0);
+    const tweak = 0.1;
+    var gain = adsr(T + offset + 0.03  * tweak, 0.01  * tweak, 0.08 * tweak, 0, 0, 0);
     var osc = context.createOscillator();
     osc.frequency.value = freq;
     osc.frequency.setValueAtTime(freq, T + offset);
@@ -29,8 +30,8 @@ function tweet(freq, offset) {
   }
 }
 
-const frequency = 500; //Original 1000;
-const offset = 0.1; //Original 0.2;
+const frequency = 1200; //Original 1000;
+const offset = 0.06; //Original 0.2;
 
 audio.init = function() {
   if(!context) 
@@ -65,10 +66,10 @@ audio.kick = function(gain) {
 
   gainOsc.gain.setValueAtTime(gain, audioContext.currentTime);
   gainOsc.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
-
+  
   gainOsc2.gain.setValueAtTime(gain, audioContext.currentTime);
   gainOsc2.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
-
+  
   osc.frequency.setValueAtTime(120, audioContext.currentTime);
   osc.frequency.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
 

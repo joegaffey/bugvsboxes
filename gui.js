@@ -1,47 +1,122 @@
 import audio from './audio.js';
 import settings from './settings.js';
+import assets from './assets.js';
 
-const GUI = {};
+const gui = {};
+gui.bugImage = new Image();
+gui.bugImage.src = assets.path + 'ladybug.png';
+gui.boxImage = new Image();
+gui.boxImage.src = assets.path + 'crate.png';
 
-GUI.data = {
-  message: ['', 'Clear the boxes!', 'Don\'t fall off the platform!'],
+gui.data = {
+  splash: true,
+  message: ['', 'vs.'],
   button: {
-    label: 'Ok'
+    label: 'Start!',
+    action: () => {
+      audio.init();
+      gui.showMessage(['Clear the boxes!', 'Don\'t fall off!'], 
+                      gui.data.nextAction);
+    }
   }
 }
 
-GUI.setAction = function(action) {
-  GUI.data.button.action = action;
+gui.setAction = function(action) {
+  gui.data.button.action = action;
 }
 
-GUI.render = function() {
-  GUI.ctx.save();
-  GUI.ctx.shadowColor = '#333'
-  GUI.ctx.shadowOffsetX = 2;
-  GUI.ctx.shadowOffsetY = 2;
-  GUI.ctx.fillStyle = 'lightgray'
-  GUI.ctx.fillRect(100, 150, 600, 300);
-  GUI.ctx.font = 'bold 30px Verdana';
-  GUI.ctx.fillStyle = '#888';
-  GUI.ctx.textAlign = 'center';
-  GUI.data.message.forEach((line, i, arr) => {
-    GUI.ctx.fillText(line, 400, 200 + i * 50);
+gui.render = function() {
+  gui.ctx.save();
+  gui.drawFrame();
+  if(gui.data.splash) {
+    gui.drawSplash();
+  }
+  else if(gui.data.bug) {
+    gui.drawBubble(...gui.data.bug.bubble);
+    gui.drawImg(gui.bugImage, gui.data.bug.x, gui.data.bug.y, gui.data.bug.scale);
+  }
+  gui.drawText();
+  gui.drawButton();
+  gui.ctx.restore();  
+}
+
+gui.drawFrame = function() {
+  gui.ctx.shadowColor = '#333'
+  gui.ctx.shadowOffsetX = 2;
+  gui.ctx.shadowOffsetY = 2;
+  gui.ctx.fillStyle = 'lightgray'
+  gui.ctx.fillRect(100, 150, 600, 300);
+}
+
+gui.drawText = function() {
+  gui.ctx.font = 'bold 30px Verdana';
+  gui.ctx.fillStyle = '#888';
+  gui.ctx.textAlign = 'center';
+  const offset = 275 - gui.data.message.length * 25;  
+  gui.data.message.forEach((line, i, arr) => {
+    gui.ctx.fillText(line, 400, offset + i * 50);
   });
-  GUI.ctx.fillStyle = 'darkgrey';
-  const d = getButtonRect(GUI.data.button.label);
-  GUI.ctx.fillRect(d.x, d.y, d.width, d.height);
-  GUI.ctx.fillStyle = 'lightgray';
-  GUI.ctx.fillText(GUI.data.button.label, 400, 400);
-  GUI.ctx.restore();  
 }
 
-GUI.checkPointer = function(e) {
-  if(isInside(getButtonRect(GUI.data.button.label), {x: e.clientX, y: e.clientY}, e))
-    GUI.action();
+gui.drawButton = function(){
+  gui.ctx.fillStyle = 'darkgrey';
+  const d = getButtonRect(gui.data.button.label);
+  gui.ctx.fillRect(d.x, d.y, d.width, d.height);
+  gui.ctx.fillStyle = 'lightgray';
+  gui.ctx.fillText(gui.data.button.label, 400, 400);
 }
 
-GUI.action = function() {
-  GUI.data.button.action.call();
+gui.drawSplash = function() {
+  gui.drawImg(gui.bugImage, 460, 240, 3);
+  gui.drawImg(gui.boxImage, 250, 220, 5);
+  const x = 250, y = 220, scale = 5,
+        xOffset = gui.boxImage.width / scale / 2, 
+        yOffset = gui.boxImage.height / scale;
+  gui.drawImg(gui.boxImage, x, y, scale);
+  gui.drawImg(gui.boxImage, x - xOffset, y + yOffset, scale);
+  gui.drawImg(gui.boxImage, x + xOffset, y + yOffset, scale);
+}
+
+gui.checkPointer = function(e) {
+  if(isInside(getButtonRect(gui.data.button.label), {x: e.clientX, y: e.clientY}, e))
+    gui.action();
+}
+
+gui.action = function() {
+  gui.data.button.action.call();
+}
+
+gui.drawBug = function(x, y, scale) {
+  gui.ctx.save();
+  gui.ctx.translate(gui.ctx.canvas.width, 0);
+  gui.ctx.scale(-1, 1);
+  gui.ctx.drawImage(gui.bugImage, x, y, gui.bugImage.width / scale, gui.bugImage.height / scale);
+  gui.ctx.restore();
+}
+
+gui.drawImg = function(img, x, y, scale) {
+  gui.ctx.save();
+  gui.ctx.translate(gui.ctx.canvas.width, 0);
+  gui.ctx.scale(-1, 1);
+  gui.ctx.drawImage(img, x, y, img.width / scale, img.height / scale);
+  gui.ctx.restore();
+}
+
+gui.drawBubble = function(x, y, width, height, x1, y1) {
+  gui.ctx.fillStyle = 'white';
+  gui.ctx.strokeStyle = 'white';
+  gui.ctx.beginPath();
+  gui.ctx.moveTo(x - width / 2, y);
+  gui.ctx.lineTo(x + width / 2, y);
+  gui.ctx.lineWidth = height;
+  gui.ctx.lineCap = 'round';
+  gui.ctx.stroke();
+  gui.ctx.lineWidth = 0;
+  gui.ctx.beginPath();
+  gui.ctx.moveTo(x1, y1);
+  gui.ctx.lineTo(x - width / 3 - 20, y  + height / 2);
+  gui.ctx.lineTo(x - width / 3 + 20, y  + height / 2);
+  gui.ctx.fill();
 }
 
 function getButtonRect(text) {
@@ -67,7 +142,7 @@ function getScaledPos(canvas, evt) {
 }
 
 function isInside(box, point, e) {
-  const p = getScaledPos(GUI.ctx.canvas, e);
+  const p = getScaledPos(gui.ctx.canvas, e);
   if(p.x > box.x && p.x < box.x + box.width &&
      p.y > box.y && p.y < box.y + box.height)
     return true;
@@ -75,8 +150,30 @@ function isInside(box, point, e) {
     return false;
 }
 
-GUI.showLevel = function(gState, action) {
-  GUI.data = {
+gui.showMessage = function(message, nextAction) {
+  const height = 30 + message.length * 50;
+  const maxLen = Math.max(...(message.map(el => el.length)));
+  const width = 20 + maxLen * 15; 
+  gui.data = {
+    message: message,
+    button: {
+      label: 'Ok',
+      action: nextAction
+    },
+    bug: {
+      x: 520,
+      y: 340,
+      scale: 3,
+      bubble: [400, 245, width, height, 275, 400]
+    }
+  }
+  message.forEach((line) => {
+    audio.say(line);
+  });
+}
+
+gui.showLevel = function(gState, action) {
+  gui.data = {
     message: [
       'Level ' + gState.level.NUMBER, 
       'Clear ' + gState.level.BOXES + ' boxes',
@@ -89,8 +186,8 @@ GUI.showLevel = function(gState, action) {
   }
 }
 
-GUI.showPause = function(gState, action) {
-  GUI.data = {
+gui.showPause = function(gState, action) {
+  gui.data = {
     message: [
       'Game Paused',
       'Level ' + gState.level.NUMBER, 
@@ -103,20 +200,20 @@ GUI.showPause = function(gState, action) {
   }
 }
 
-GUI.showEndScreen = function(code, action) {
+gui.showEndScreen = function(code, action) {
   let message = ['','Congratulations!', 'You finshed the game!!!'];
   if(code === 0) {
-    audio.say('finished at last');
+    //audio.say('finished at last');
   }
   if(code === 1) {
     message = ['','Weight limit exceeded!' , 'Game over!'];
-    audio.say('so sad');
+    //audio.say('so sad');
   }
   if(code === 2) {
     message = ['','You fell to your doom!!!', 'Game over!'];
-    audio.say('Oh noes');
+    //audio.say('Oh noes');
   }
-  GUI.data = {
+  gui.data = {
     message: message,
     button: {
       label: 'Restart',
@@ -125,4 +222,4 @@ GUI.showEndScreen = function(code, action) {
   }
 }
 
-export default GUI;
+export default gui;
