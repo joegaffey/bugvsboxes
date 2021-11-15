@@ -7,7 +7,7 @@ var levels = [{
     MIN_RATE: 1000,
     BOXES: 10,
     SIZES: { SMALL: 10, MEDIUM: 0, LARGE: 0 },
-    SAY_COMPLETE: 'wohoo'
+    SAY_COMPLETE: ['Well done!', '😁']
   },
   { 
     NUMBER: 2,
@@ -18,7 +18,7 @@ var levels = [{
     MIN_RATE: 800,
     BOXES: 15,
     SIZES: { SMALL: 9, MEDIUM: 1, LARGE: 0 },
-    SAY_COMPLETE: 'yes'
+    SAY_COMPLETE: ['Great job!', '🥳']
   },
   {
     NUMBER: 3,
@@ -29,7 +29,7 @@ var levels = [{
     MIN_RATE: 700,
     BOXES: 25,
     SIZES: { SMALL: 8, MEDIUM: 2, LARGE: 0 },
-    SAY_COMPLETE: 'finished'
+    SAY_COMPLETE: ['Wohoo!!!', '💯']
   },
   { 
     NUMBER: 4,
@@ -40,7 +40,7 @@ var levels = [{
     MIN_RATE: 500,
     BOXES: 35,
     SIZES: { SMALL: 7, MEDIUM: 3, LARGE: 0 },
-    SAY_COMPLETE: 'phew'
+    SAY_COMPLETE:  ['Getting serious now!', '😅']
   },
   { 
     NUMBER: 5,
@@ -51,7 +51,7 @@ var levels = [{
     MIN_RATE: 500,
     BOXES: 40,
     SIZES: { SMALL: 6, MEDIUM: 4, LARGE: 0 },
-    SAY_COMPLETE: 'noice'
+    SAY_COMPLETE: ['Noice!', '🧐']
   },
   { 
     NUMBER: 6,
@@ -62,7 +62,7 @@ var levels = [{
     MIN_RATE: 500,
     BOXES: 45,
     SIZES: { SMALL: 5, MEDIUM: 5, LARGE: 0 },
-    SAY_COMPLETE: 'finished'
+    SAY_COMPLETE: ['Phew!', '😵‍💫']
   },
   { 
     NUMBER: 7,
@@ -73,7 +73,7 @@ var levels = [{
     MIN_RATE: 500,
     BOXES: 45,
     SIZES: { SMALL: 4, MEDIUM: 5, LARGE: 1 },
-    SAY_COMPLETE: 'finished'
+    SAY_COMPLETE: ['That was tough!', '💪']
   },
   { 
     NUMBER: 8,
@@ -84,7 +84,7 @@ var levels = [{
     MIN_RATE: 500,
     BOXES: 45,
     SIZES: { SMALL: 3, MEDIUM: 5, LARGE: 2 },
-    SAY_COMPLETE: 'finished'
+    SAY_COMPLETE: ['Wow, you are good!', '😇']
   },
   { 
     NUMBER: 9,
@@ -95,7 +95,7 @@ var levels = [{
     MIN_RATE: 500,
     BOXES: 45,
     SIZES: { SMALL: 2, MEDIUM: 5, LARGE: 3 },
-    SAY_COMPLETE: 'finished'
+    SAY_COMPLETE: ['Not sure how much', 'more I can take!', '😟']
   },
   { 
     NUMBER: 10,
@@ -106,7 +106,7 @@ var levels = [{
     MIN_RATE: 500,
     BOXES: 45,
     SIZES: { SMALL: 1, MEDIUM: 5, LARGE: 4 },
-    SAY_COMPLETE: 'finished'
+    SAY_COMPLETE:  ['Let\'s go!!!', '💥']
   },
   { 
     NUMBER: 11,
@@ -117,7 +117,7 @@ var levels = [{
     MIN_RATE: 500,
     BOXES: 45,
     SIZES: { SMALL: 0, MEDIUM: 5, LARGE: 5 },
-    SAY_COMPLETE: 'finished'
+    SAY_COMPLETE:  ['Nearly there!', '😎']
   },
   { 
     NUMBER: 12,
@@ -128,7 +128,7 @@ var levels = [{
     MIN_RATE: 300,
     BOXES: 45,
     SIZES: { SMALL: 10, MEDIUM: 0, LARGE: 0 },
-    SAY_COMPLETE: 'finished'
+    SAY_COMPLETE:  ['Thank You!', '❤ ❤ ❤ ❤ ❤']
   }  
 ];
 
