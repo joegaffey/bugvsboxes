@@ -11,13 +11,13 @@ Mouse, touch or keyboard (arrow keys or z & x).
 ## Features
 
 ✅  Advanced physics simulation (matter.js)  
-🚧  Physics based audio  
+✅  Physics based audio  
 ✅  Keyboard and mouse controls  
 ✅  Touch controls  
-🚧  Lady bug to English  
+✅  Ladybug to English  
 ⏳  Installable PWA  
 ⏳  Gamepad controls  
-⏳  Haptics    
+⏳  Haptics  
 ⏳  i18n  
 ⏳  Power ups  
 

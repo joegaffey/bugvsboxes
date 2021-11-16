@@ -14,7 +14,8 @@ gui.data = {
   button: {
     label: 'Start!',
     action: () => {
-      audio.init();
+      if(!audio.context)
+        audio.init();
       gui.showMessage(['Clear the boxes!', 'Don\'t fall off!'], 
                       gui.data.nextAction);
     }
@@ -83,6 +84,8 @@ gui.checkPointer = function(e) {
 }
 
 gui.action = function() {
+  if(audio.context)
+    audio.context.resume();
   gui.data.button.action.call();
 }
 

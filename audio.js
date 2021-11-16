@@ -1,13 +1,13 @@
 //Code from https://www.redblobgames.com/x/1618-webaudio/
-var context = null;
-var audio = {};
+let context = null;
+const audio = {};
 
 function adsr(T, a, d, s, r, sustain) {
   var gain = context.createGain();
   function set(v, t) { gain.gain.linearRampToValueAtTime(v, T + t); }
   set(0.0, -T);
   set(0.0, 0);
-  set(0.1, a);
+  set(0.1, a); // set(1, a);
   set(sustain, a + d);
   set(sustain, a + d + s);
   set(0.0, a + d + s + r);
@@ -17,7 +17,7 @@ function adsr(T, a, d, s, r, sustain) {
 function tweet(freq, offset) {
   if(context) {
     var T = context.currentTime;
-    const tweak = 0.1;
+    const tweak = 0.1; // Added by JG
     var gain = adsr(T + offset + 0.03  * tweak, 0.01  * tweak, 0.08 * tweak, 0, 0, 0);
     var osc = context.createOscillator();
     osc.frequency.value = freq;
@@ -30,12 +30,17 @@ function tweet(freq, offset) {
   }
 }
 
-const frequency = 1200; //Original 1000;
-const offset = 0.06; //Original 0.2;
+const frequency = 1200; // 1000;
+const offset = 0.06; // 0.2;
 
 audio.init = function() {
-  if(!context) 
+  if(!context)
     context = new AudioContext();
+  const buffer = context.createBuffer(1, 1, 22050);
+  const source = context.createBufferSource();
+  source.buffer = buffer;
+  source.connect(context.destination);
+  source.start(1, 0, 0.001);
 }
 
 audio.say = function(message) {
