@@ -25,6 +25,7 @@ const containerEl = document.querySelector('#matter');
 
 // create an engine
 const engine = Engine.create();
+engine.timing.isFixed = true;
 
 const render = Render.create({
   element: containerEl,
@@ -37,6 +38,7 @@ Render.run(render);
 
 // create runner
 const runner = Runner.create();
+runner.isFixed = true;
 
 // run the engine
 Runner.run(runner, engine);
@@ -95,6 +97,8 @@ resize();
 /////////////////////  Controls setup  ////////////////////////////////////
 
 containerEl.addEventListener('pointerdown', (e) => { 
+  if(!audio.context)
+    audio.init();
   if(gState.running)
     move(e.clientX); 
   else 
@@ -324,3 +328,11 @@ function resize() {
   render.canvas.style.width = w + 'px';
   render.canvas.style.height = h + 'px';
 }
+
+document.addEventListener('visibilitychange', event => {
+  if (document.visibilityState === 'visible') {
+  } else {
+    if(gState.running)
+      pause();
+  }
+})
