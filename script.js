@@ -118,7 +118,6 @@ containerEl.addEventListener('pointermove', (e) => {
 const keys = [];
 document.body.addEventListener("keydown", function(e) {
   keys[e.keyCode] = true;
-  e.preventDefault();
   if(keys[32] || keys[13]) {
     if(gState.running)
       pause();
@@ -128,7 +127,6 @@ document.body.addEventListener("keydown", function(e) {
 });
 document.body.addEventListener("keyup", function(e) {
   keys[e.keyCode] = false;
-  e.preventDefault();
 });
 
 /////////////////////  Matter Events setup  ////////////////////////////////////

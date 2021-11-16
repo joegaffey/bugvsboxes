@@ -24,8 +24,13 @@ Mouse, touch or keyboard (arrow keys or z & x).
 
 ## Credits
 
-Graphic assets from [OpenGameArt.org](https://opengameart.org/), [FreeSVG](https://freesvg.org/ladybug-white-eyes) and [Wikimedia Commons](https://commons.wikimedia.org/wiki/Main_Page)  
-Physics based on [matter.js](https://brm.io/matter-js/)  
 Game engine runtime courtesy of [W3C](https://www.w3.org/) ;)  
-Developed completely in-browser at [Glitch](https://glitch.com/edit/#!/bugvsboxes)  
-Graphics designs produced online at [Pixlr](https://pixlr.com/)  
+Coded entirely in-browser at [Glitch](https://glitch.com/edit/#!/bugvsboxes)  
+Physics simulation implemented using [matter.js](https://brm.io/matter-js/)  
+Graphics designs tweaked online at [Pixlr](https://pixlr.com/)  
+
+Graphics assets from:
+* [OpenGameArt.org](https://opengameart.org/)  
+* [FreeSVG](https://freesvg.org/ladybug-white-eyes)  
+* [OpenClipArt](https://openclipart.org/detail/299762/simple-grasss)  
+* [Wikimedia Commons](https://commons.wikimedia.org/wiki/Main_Page)  

@@ -55,7 +55,14 @@ gui.drawText = function() {
   gui.ctx.textAlign = 'center';
   const offset = 275 - gui.data.message.length * 25;  
   gui.data.message.forEach((line, i, arr) => {
-    gui.ctx.fillText(line, 400, offset + i * 50);
+    if(line.startsWith('e:')) {
+      gui.ctx.save();
+      gui.ctx.font = '40px serif';
+      gui.ctx.fillText(line.substring(2), 400, offset + i * 50);
+      gui.ctx.restore();
+    }
+    else
+      gui.ctx.fillText(line, 400, offset + i * 50);
   });
 }
 
