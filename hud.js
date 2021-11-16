@@ -3,21 +3,17 @@ import settings from './settings.js';
 const hud = {};
 
 hud.render = function(gState) {
-  let color = '#44AA44';
+  let color = '#88DD88';
   if(gState.platformLoad > gState.level.DANGER_BOXES * settings.LOAD_RATIO) {
-    color = '#ff0000';
+    color = '#FF4444';
     gState.messageText = 'DANGER!'; 
   }
   else if(gState.platformLoad > gState.level.WARN_BOXES * settings.LOAD_RATIO) {
     color = 'orange';
     gState.messageText = 'WARNING!';
   }
-  else {
-    if((gState.level.BOXES - gState.level.remaining) < 5)
-      gState.messageText = 'Level ' + gState.level.NUMBER;
-    else
-      gState.messageText = '';
-  }
+  else
+    gState.messageText = 'Level ' + gState.level.NUMBER;
   hud.ctx.save();
   hud.ctx.font = 'bold 30px Verdana';
   hud.ctx.fillStyle = color;

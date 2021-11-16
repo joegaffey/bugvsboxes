@@ -5,7 +5,7 @@ const settings = {
   LOAD_RATIO: 30,
   CONTAINER_OPTIONS: {
     wireframes: false,
-    background: 'url(' + assets.path + 'background.png)'//'blue_sky.png)'
+    background: 'url(' + assets.path + 'background.png)'
   },
   GROUND_OPTIONS: { 
     label: 'ground',
@@ -14,8 +14,8 @@ const settings = {
       fillStyle: '#338833'
     }
   },
-  GRASS_SCALE: 0.27,
-  GRASS_TEXTURE: assets.path + 'grass.png',
+  GRASS_SCALE: 0.193,
+  GRASS_TEXTURE: assets.path + 'simplegrass.png',
   
   // Screen settings
   SCREEN_RATIO: 1.333,

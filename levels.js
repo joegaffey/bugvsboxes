@@ -7,7 +7,7 @@ var levels = [{
     MIN_RATE: 1000,
     BOXES: 10,
     SIZES: { SMALL: 10, MEDIUM: 0, LARGE: 0 },
-    SAY_COMPLETE: ['Well done!', '😁']
+    SAY_COMPLETE: ['Well done!', 'e:😁']
   },
   { 
     NUMBER: 2,
@@ -18,7 +18,7 @@ var levels = [{
     MIN_RATE: 800,
     BOXES: 15,
     SIZES: { SMALL: 9, MEDIUM: 1, LARGE: 0 },
-    SAY_COMPLETE: ['Great job!', '🥳']
+    SAY_COMPLETE: ['Great job!', 'e:🥳']
   },
   {
     NUMBER: 3,
@@ -29,7 +29,7 @@ var levels = [{
     MIN_RATE: 700,
     BOXES: 25,
     SIZES: { SMALL: 8, MEDIUM: 2, LARGE: 0 },
-    SAY_COMPLETE: ['Wohoo!!!', '💯']
+    SAY_COMPLETE: ['Wohoo!!!', 'e:💯']
   },
   { 
     NUMBER: 4,
@@ -40,7 +40,7 @@ var levels = [{
     MIN_RATE: 500,
     BOXES: 35,
     SIZES: { SMALL: 7, MEDIUM: 3, LARGE: 0 },
-    SAY_COMPLETE:  ['Getting serious now!', '😅']
+    SAY_COMPLETE:  ['Getting serious now!', 'e:😅']
   },
   { 
     NUMBER: 5,
@@ -51,7 +51,7 @@ var levels = [{
     MIN_RATE: 500,
     BOXES: 40,
     SIZES: { SMALL: 6, MEDIUM: 4, LARGE: 0 },
-    SAY_COMPLETE: ['Noice!', '🧐']
+    SAY_COMPLETE: ['Noice!', 'e:🧐']
   },
   { 
     NUMBER: 6,
@@ -62,7 +62,7 @@ var levels = [{
     MIN_RATE: 500,
     BOXES: 45,
     SIZES: { SMALL: 5, MEDIUM: 5, LARGE: 0 },
-    SAY_COMPLETE: ['Phew!', '😵‍💫']
+    SAY_COMPLETE: ['Phew!', 'e:😵‍💫']
   },
   { 
     NUMBER: 7,
@@ -84,7 +84,7 @@ var levels = [{
     MIN_RATE: 500,
     BOXES: 45,
     SIZES: { SMALL: 3, MEDIUM: 5, LARGE: 2 },
-    SAY_COMPLETE: ['Wow, you are good!', '😇']
+    SAY_COMPLETE: ['Wow, you are good!', 'e:😇']
   },
   { 
     NUMBER: 9,
@@ -95,7 +95,7 @@ var levels = [{
     MIN_RATE: 500,
     BOXES: 45,
     SIZES: { SMALL: 2, MEDIUM: 5, LARGE: 3 },
-    SAY_COMPLETE: ['Not sure how much', 'more I can take!', '😟']
+    SAY_COMPLETE: ['Not sure how much', 'more I can take!', 'e:😟']
   },
   { 
     NUMBER: 10,
@@ -106,7 +106,7 @@ var levels = [{
     MIN_RATE: 500,
     BOXES: 45,
     SIZES: { SMALL: 1, MEDIUM: 5, LARGE: 4 },
-    SAY_COMPLETE:  ['Let\'s go!!!', '💥']
+    SAY_COMPLETE:  ['Let\'s go!!!', 'e:💥']
   },
   { 
     NUMBER: 11,
@@ -117,7 +117,7 @@ var levels = [{
     MIN_RATE: 500,
     BOXES: 45,
     SIZES: { SMALL: 0, MEDIUM: 5, LARGE: 5 },
-    SAY_COMPLETE:  ['Nearly there!', '😎']
+    SAY_COMPLETE:  ['Nearly there!', 'e:😎']
   },
   { 
     NUMBER: 12,
@@ -128,7 +128,7 @@ var levels = [{
     MIN_RATE: 300,
     BOXES: 45,
     SIZES: { SMALL: 10, MEDIUM: 0, LARGE: 0 },
-    SAY_COMPLETE:  ['Thank You!', '❤ ❤ ❤ ❤ ❤']
+    SAY_COMPLETE:  ['Thank You!', 'e:❤ ❤ ❤ ❤ ❤']
   }  
 ];
 
