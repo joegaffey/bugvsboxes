@@ -1,5 +1,6 @@
 import Matter from './matter.js';
 import assets from './assets.js';
+import audio from './audio.js';
 
 /**
 * Creates a composite with simple car setup of bodies and constraints.
@@ -113,6 +114,13 @@ const Car = function(xx, yy, width, height, wheelSize) {
     if(wheelB.position.x > 790) {
       wheelA.torque -= 0.15;
     }
+  }
+  
+  car.updateEngine = function() {
+    let pow = Math.abs(wheelB.angularVelocity * 20);
+    if(pow < 1) pow = 1;
+    if(pow > 8) pow = 8;
+    audio.engine.power(pow);
   }
 
   Composite.addBody(car, body);
