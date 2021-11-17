@@ -189,6 +189,7 @@ Events.on(render, "afterRender", () => {
 
 function pause() {
   if(gState.running) {
+    audio.engine.stop();
     gui.showPause(gState, () => pause());
     runner.enabled = false;
     gState.running = false;
@@ -196,6 +197,7 @@ function pause() {
   else {
     runner.enabled = true;
     gState.running = true;
+    audio.engine.start();
   }
 }
 
@@ -204,15 +206,18 @@ function startLevel(num) {
   gState.running = true;
   gState.boxes = [];
   runner.enabled = true;
+  audio.engine.start();
 }
 
 function endGame(code) {
+  audio.engine.stop();
   gui.showEndScreen(code, () => restart());
   runner.enabled = false;
   gState.running = false;
 }
 
 function endLevel() {
+  audio.engine.stop();
   const message = gState.level.SAY_COMPLETE;
   gState.level = levels[gState.level.NUMBER];
   gui.showMessage(message, () => {
@@ -234,6 +239,7 @@ function restart() {
 ///////////////////////// Object updates ////////////////////////////
 
 function updateCar() {
+  car.updateEngine();
   if(car.bodies[0].position.y > 1000) {
     endGame(2);    
   }

@@ -32,7 +32,7 @@ const settings = {
     }
   },
   SMALL_BOX_SCALE: 0.24,
-  MEDIUM_BOX_SCALE: 0.36,
+  MEDIUM_BOX_SCALE: 0.32,
   LARGE_BOX_SCALE: 0.4,
   SMALL_BOX_SIZE: 60,
   MEDIUM_BOX_SIZE: 80,

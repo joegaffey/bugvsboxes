@@ -93,6 +93,79 @@ audio.kick = function(gain) {
   osc2.stop(audioContext.currentTime + 0.5);
 };
 
+
+var noise, constant, drive, gain1, gain2, gain3;
+
+function rotor(brush, rotor, freq) {
+  noise = make_buffer(fill_hihat, {});
+  noise.loop = true;
+
+  var filter1 = context.createBiquadFilter();
+  filter1.type = "bandpass";
+  filter1.frequency.value = 4000;
+  filter1.Q.value = 1;
+  noise.connect(filter1);
+
+  gain1 = context.createGain();
+  gain1.gain.value = brush;
+  filter1.connect(gain1);
+
+  constant = make_buffer(fill_one, {});
+  constant.loop = true;
+  gain2 = context.createGain();
+  gain2.gain.value = rotor;
+  constant.connect(gain2);
+
+  gain3 = context.createGain();
+  gain3.gain.value = 0;
+  gain1.connect(gain3);
+  gain2.connect(gain3);
+
+  drive = make_buffer(fill_phasor_power, {power: 4, freq: freq});
+  drive.loop = true;
+  drive.connect(gain3.gain);
+
+  gain3.connect(context.destination);
+}
+
+function fill_one(t, env, state) {
+  return 1.0;
+}
+
+function fill_phasor_power(t, env, state) {
+  var phase = (t * env.freq) % 1.0;
+  return Math.pow(phase, env.power);
+}
+
+function rate(rate) {
+  if(noise) noise.playbackRate.value = rate;
+  if(drive) drive.playbackRate.value = rate;
+  if(constant) drive.playbackRate.value = rate;
+}
+
+audio.engine = {}
+audio.engine.stop = function() {
+  if(noise) noise.stop();
+  if(drive) drive.stop();
+  if(constant) constant.stop();
+}
+audio.engine.start = function() {
+  audio.engine.stop();
+  rotor(0.5, 0.2, 20);
+  noise.start();
+  drive.start();
+  constant.start();
+}
+audio.engine.power = function(pow) {
+  rate(pow);
+  gain(pow / 20);
+}
+
+function gain(level) {
+  if(gain1) gain1.gain.value = level * 0.5;
+  if(gain2) gain2.gain.value = level * 0.2;
+}
+
 export default audio;
 
 
@@ -112,22 +185,22 @@ export default audio;
 //   drum(fill_hihat, {a: 0.0, d: 0.0, s: 0.15, r: 0.2, sustain: 0.8});
 // }
 
-// function make_buffer(fill, env) {
-//     var count = context.sampleRate * 2;
-//     var buffer = context.createBuffer(1, count, context.sampleRate);
+function make_buffer(fill, env) {
+    var count = context.sampleRate * 2;
+    var buffer = context.createBuffer(1, count, context.sampleRate);
 
-//     var data = buffer.getChannelData(0 /* channel */);
-//     var state = {};
-//     var prev_random = 0.0;
-//     for (var i = 0; i < count; i++) {
-//         var t = i / context.sampleRate;
-//         data[i] = fill(t, env, state);
-//     }
+    var data = buffer.getChannelData(0 /* channel */);
+    var state = {};
+    var prev_random = 0.0;
+    for (var i = 0; i < count; i++) {
+        var t = i / context.sampleRate;
+        data[i] = fill(t, env, state);
+    }
 
-//     var source = context.createBufferSource();
-//     source.buffer = buffer;
-//     return source;
-// }
+    var source = context.createBufferSource();
+    source.buffer = buffer;
+    return source;
+}
 
 // function fill_thump(t, env, state) {
 //     var frequency = 60;
@@ -144,13 +217,13 @@ export default audio;
 //         0.5 * curr_random;
 // }
 
-// function fill_hihat(t, env, state) {
-//     var prev_random = state.prev_random || 0;
-//     var next_random = Math.random() * 2 - 1;
-//     var curr = (3*next_random - prev_random) / 2;
-//     prev_random = next_random;
-//     return curr;
-// }
+function fill_hihat(t, env, state) {
+    var prev_random = state.prev_random || 0;
+    var next_random = Math.random() * 2 - 1;
+    var curr = (3*next_random - prev_random) / 2;
+    prev_random = next_random;
+    return curr;
+}
 
 // function drum(fill, env) {
 //     var source = make_buffer(fill, env);
