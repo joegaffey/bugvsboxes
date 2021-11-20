@@ -44,8 +44,6 @@ runner.isFixed = true;
 Runner.run(runner, engine);
 
 let car;
-setupWorld();
-
 // Render.lookAt(render, car, {x: 200, y:100})
 
 const gState = {
@@ -203,7 +201,10 @@ function pause() {
   }
 }
 
-function startLevel(num) {
+function startLevel(num) {  
+  Composite.clear(engine.world);
+  Engine.clear(engine);
+  setupWorld();
   gState.level.remaining = gState.level.BOXES;
   gState.running = true;
   gState.boxes = [];
@@ -232,9 +233,6 @@ function endLevel() {
 function restart() {
   gState.level = levels[0];
   gState.platformLoad = 0;
-  Composite.clear(engine.world);
-  Engine.clear(engine);
-  setupWorld();
   gui.showLevel(gState, () => startLevel(0))
 }
 
@@ -258,8 +256,9 @@ function updateBoxes() {
   }
   gState.boxes.forEach((box, i) => {
     if(box.position.y > 1000) {
-      box = null;
       gState.boxes.splice(i, 1);
+      Composite.remove(engine.world, box);
+      box = null;
     }
   });
   if(gState.level.remaining === 0 && gState.boxes.length === 0) {
@@ -271,6 +270,8 @@ function updateBoxes() {
 }
 
 function addBox() {
+  if(hud.countdown)
+    return;
   const smallCrateOptions = JSON.parse(JSON.stringify(settings.BOX_OPTIONS));
   smallCrateOptions.render.sprite.xScale = settings.SMALL_BOX_SCALE;
   smallCrateOptions.render.sprite.yScale = settings.SMALL_BOX_SCALE;
