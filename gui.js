@@ -211,17 +211,15 @@ gui.showPause = function(gState, action) {
 }
 
 gui.showEndScreen = function(code, action) {
-  let message = ['','Congratulations!', 'You finshed the game!!!'];
+  let message = [];
   if(code === 0) {
-    //audio.say('finished at last');
+     message = ['','Congratulations!', 'You finshed the game!!!'];
   }
   if(code === 1) {
     message = ['','Weight limit exceeded!' , 'Game over!'];
-    //audio.say('so sad');
   }
-  if(code === 2) {
+  else if(code === 2) {
     message = ['','You fell to your doom!!!', 'Game over!'];
-    //audio.say('Oh noes');
   }
   gui.data = {
     message: message,

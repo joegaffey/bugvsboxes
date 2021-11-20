@@ -46,6 +46,8 @@ Runner.run(runner, engine);
 let car;
 setupWorld();
 
+// Render.lookAt(render, car, {x: 200, y:100})
+
 const gState = {
   platformLoad: 0,
   isAccel: false,
@@ -247,8 +249,12 @@ function updateCar() {
 
 function updateBoxes() {
   if(gState.platformLoad >= gState.level.MAX_BOXES * settings.LOAD_RATIO) {
-    endGame(1);
+    if(!hud.countdown)
+      hud.startCountdown(10, () => endGame(1));
     return;
+  }
+  else if(hud.countdown) {
+    hud.endCountdown();
   }
   gState.boxes.forEach((box, i) => {
     if(box.position.y > 1000) {
