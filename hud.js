@@ -25,7 +25,34 @@ hud.render = function(gState) {
                    + gState.level.MAX_BOXES * settings.LOAD_RATIO + 'kg', 150, 50);
   hud.ctx.fillText(gState.messageText, 400, 50);
   hud.ctx.fillText(gState.level.remaining + gState.boxes.length, 750, 50);
+  if(hud.countdown) {
+    hud.ctx.font = 'bold 60px Verdana';
+    hud.ctx.fillText(hud.countdown.value + 's remaining!', 400, 250);
+  }
   hud.ctx.restore();
 }
+
+hud.startCountdown = function(count, callback) {
+  hud.countdown = {};
+  hud.countdown.value = count;
+  hud.countdown.callback = callback;
+  hud.countdown.timer = setInterval(() => { 
+    hud.updateCountdown();
+  }, 1000);
+}
+
+hud.updateCountdown = function() {
+  hud.countdown.value--;
+  if(hud.countdown.value === 0) {
+    hud.countdown.callback.call();
+    hud.endCountdown();
+  } 
+}
+
+hud.endCountdown = function() {
+  clearInterval(hud.countdown.timer);
+  hud.countdown = null;
+}
+
 
 export default hud;

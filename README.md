@@ -24,7 +24,7 @@ Mouse, touch or keyboard (arrow keys or z & x).
 
 ## Credits
 
-Game engine runtime courtesy of [W3C](https://www.w3.org/) ;)  
+Game engine runtime courtesy of [W3C](https://www.w3.org/wiki/Open_Web_Platform) ;)  
 Coded entirely in-browser at [Glitch](https://glitch.com/edit/#!/bugvsboxes)  
 Physics simulation implemented using [matter.js](https://brm.io/matter-js/)  
 Procedural audio based on original work by [Red Blob Games](https://www.redblobgames.com/x/1618-webaudio/)  
