@@ -93,6 +93,7 @@ gui.checkPointer = function(e) {
 gui.action = function() {
   if(audio.context)
     audio.context.resume();
+  audio.play('button');
   gui.data.button.action.call();
 }
 

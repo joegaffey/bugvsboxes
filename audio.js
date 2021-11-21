@@ -1,6 +1,21 @@
-//Code from https://www.redblobgames.com/x/1618-webaudio/
+import assets from './assets.js';
+
 let context = null;
 const audio = {};
+
+// All audio.sounds were generated online at https://www.leshylabs.com/apps/sfMaker/
+audio.sounds = { fall: { audio: new Audio(assets.path + 'fall.wav'), volume: 0.3 }, //W=8000,f=4000,V=0,b=0,r=1,s=40,S=20,z=Down,g=0.6,L=0.5 
+                 score: { audio: new Audio(assets.path + 'pickup.wav'), volume: 0.2 }, //Noise 3 (I think)
+                 button: { audio: new Audio(assets.path + 'button.wav'), volume: 0.2 }, //W=8000,f=500,v=6.793,V=559.783,_=-0.9,a=3,A=3,b=3,r=3,c=-4500,C=0,l=0.2,L=0.25
+                 explode: { audio: new Audio(assets.path + 'explode.wav'), volume: 0.2 }}; //Explosion 2
+
+audio.play = function(sound) {
+  const snd = audio.sounds[sound].audio.cloneNode();
+  snd.volume = audio.sounds[sound].volume;
+  snd.play();
+}
+
+//Code from https://www.redblobgames.com/x/1618-webaudio/
 
 function adsr(T, a, d, s, r, sustain) {
   var gain = context.createGain();
@@ -54,45 +69,6 @@ audio.say = function(message) {
     tweet(frequency * (1 + 2 * val), i * offset);
   });
 }
-
-
-//https://sonoport.github.io/synthesising-sounds-webaudio.html
-audio.kick = function(gain) {
-  if(!context)
-    return;
-  var audioContext = context;
-  var osc = audioContext.createOscillator();
-  var osc2 = audioContext.createOscillator();
-  var gainOsc = audioContext.createGain();
-  var gainOsc2 = audioContext.createGain();
-
-  osc.type = "triangle";
-  osc2.type = "sine";
-
-  gainOsc.gain.setValueAtTime(gain, audioContext.currentTime);
-  gainOsc.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
-  
-  gainOsc2.gain.setValueAtTime(gain, audioContext.currentTime);
-  gainOsc2.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
-  
-  osc.frequency.setValueAtTime(120, audioContext.currentTime);
-  osc.frequency.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
-
-  osc2.frequency.setValueAtTime(50, audioContext.currentTime);
-  osc2.frequency.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
-
-  osc.connect(gainOsc);
-  osc2.connect(gainOsc2);
-  gainOsc.connect(audioContext.destination);
-  gainOsc2.connect(audioContext.destination);
-
-  osc.start(audioContext.currentTime);
-  osc2.start(audioContext.currentTime);
-
-  osc.stop(audioContext.currentTime + 0.5);
-  osc2.stop(audioContext.currentTime + 0.5);
-};
-
 
 var noise, constant, drive, gain1, gain2, gain3;
 
@@ -165,6 +141,44 @@ function gain(level) {
   if(gain1) gain1.gain.value = level * 0.5;
   if(gain2) gain2.gain.value = level * 0.2;
 }
+
+
+//https://sonoport.github.io/synthesising-sounds-webaudio.html
+audio.kick = function(gain) {
+  if(!context)
+    return;
+  var audioContext = context;
+  var osc = audioContext.createOscillator();
+  var osc2 = audioContext.createOscillator();
+  var gainOsc = audioContext.createGain();
+  var gainOsc2 = audioContext.createGain();
+
+  osc.type = "triangle";
+  osc2.type = "sine";
+
+  gainOsc.gain.setValueAtTime(gain, audioContext.currentTime);
+  gainOsc.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+  
+  gainOsc2.gain.setValueAtTime(gain, audioContext.currentTime);
+  gainOsc2.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+  
+  osc.frequency.setValueAtTime(120, audioContext.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+
+  osc2.frequency.setValueAtTime(50, audioContext.currentTime);
+  osc2.frequency.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+
+  osc.connect(gainOsc);
+  osc2.connect(gainOsc2);
+  gainOsc.connect(audioContext.destination);
+  gainOsc2.connect(audioContext.destination);
+
+  osc.start(audioContext.currentTime);
+  osc2.start(audioContext.currentTime);
+
+  osc.stop(audioContext.currentTime + 0.5);
+  osc2.stop(audioContext.currentTime + 0.5);
+};
 
 export default audio;
 
