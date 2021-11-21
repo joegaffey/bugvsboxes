@@ -29,6 +29,7 @@ Coded entirely in-browser at [Glitch](https://glitch.com/edit/#!/bugvsboxes)
 Physics simulation implemented using [matter.js](https://brm.io/matter-js/)  
 Procedural audio based on original work by [Red Blob Games](https://www.redblobgames.com/x/1618-webaudio/)  
 Graphics designs tweaked online at [Pixlr](https://pixlr.com/)  
+Additional SFX generated online at [SFMaker](https://www.leshylabs.com/apps/sfMaker/)  
 
 Graphics assets from:
 * [OpenGameArt.org](https://opengameart.org) ([1](https://opengameart.org/content/game-background-forest),[2](https://opengameart.org/content/cartoon-wooden-crate))  

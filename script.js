@@ -241,6 +241,7 @@ function restart() {
 function updateCar() {
   car.updateEngine();
   if(car.bodies[0].position.y > 1000) {
+    audio.play('explode');
     endGame(2);    
   }
 }
@@ -256,6 +257,7 @@ function updateBoxes() {
   }
   gState.boxes.forEach((box, i) => {
     if(box.position.y > 1000) {
+      audio.play('score');
       gState.boxes.splice(i, 1);
       Composite.remove(engine.world, box);
       box = null;
@@ -286,6 +288,7 @@ function addBox() {
 
   if(gState.level.remaining > 0 && gState.boxes.length < gState.level.MAX_BOXES &&  gState.running) {
     let box;
+    audio.play('fall');
     
     let sm = Math.random() * gState.level.SIZES.LARGE,
       md = Math.random() * gState.level.SIZES.MEDIUM,
