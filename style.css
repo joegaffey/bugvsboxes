@@ -6,19 +6,23 @@ body {
   touch-action: none; 
   user-select: none;
   -webkit-user-select: none;
+  position: relative;
 }
 
-.matter {
-  background-color: #222;
-  position: absolute;
-  top: 0px;
-  bottom: 0px;
-  left: 0px;
-  right: 0px;
+#video {
+  display: none;
+  background-color: black;
+  border: 10px solid red;
+  position: absolute; 
+  width: 40%;
+  height: 40%;
+  top: 15%;
+  left: 30%;
 }
 
 #matter > canvas {
   background-color: #000000;
   display: block;
   margin: 0 auto;
+  outline-offset: -10px;
 }

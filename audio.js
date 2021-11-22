@@ -1,7 +1,7 @@
 import assets from './assets.js';
 
-let context = null;
 const audio = {};
+audio.context = new AudioContext();
 
 // All audio.sounds were generated online at https://www.leshylabs.com/apps/sfMaker/
 audio.sounds = { fall: { audio: new Audio(assets.path + 'fall.wav'), volume: 0.3 }, //W=8000,f=4000,V=0,b=0,r=1,s=40,S=20,z=Down,g=0.6,L=0.5 
@@ -12,13 +12,21 @@ audio.sounds = { fall: { audio: new Audio(assets.path + 'fall.wav'), volume: 0.3
 audio.play = function(sound) {
   const snd = audio.sounds[sound].audio.cloneNode();
   snd.volume = audio.sounds[sound].volume;
+  const source = audio.context.createMediaElementSource(snd);
+  source.connect(audio.context.destination);
+  audio.record(source);
   snd.play();
+}
+
+audio.record = function(source) {
+  if(audio.recorder)
+    audio.recorder.addAudioSource(source);
 }
 
 //Code from https://www.redblobgames.com/x/1618-webaudio/
 
 function adsr(T, a, d, s, r, sustain) {
-  var gain = context.createGain();
+  var gain = audio.context.createGain();
   function set(v, t) { gain.gain.linearRampToValueAtTime(v, T + t); }
   set(0.0, -T);
   set(0.0, 0);
@@ -30,16 +38,17 @@ function adsr(T, a, d, s, r, sustain) {
 }
 
 function tweet(freq, offset) {
-  if(context) {
-    var T = context.currentTime;
+  if(audio.context) {
+    var T = audio.context.currentTime;
     const tweak = 0.1; // Added by JG
     var gain = adsr(T + offset + 0.03  * tweak, 0.01  * tweak, 0.08 * tweak, 0, 0, 0);
-    var osc = context.createOscillator();
+    var osc = audio.context.createOscillator();
     osc.frequency.value = freq;
     osc.frequency.setValueAtTime(freq, T + offset);
     osc.frequency.exponentialRampToValueAtTime(freq * 2, T + offset + 0.1);
     osc.connect(gain);
-    gain.connect(context.destination);
+    gain.connect(audio.context.destination);
+    audio.record(gain);
     osc.start();
     osc.stop(T + offset + 0.15);
   }
@@ -49,13 +58,8 @@ const frequency = 1200; // 1000;
 const offset = 0.06; // 0.2;
 
 audio.init = function() {
-  if(!context)
-    context = new AudioContext();
-  const buffer = context.createBuffer(1, 1, 22050);
-  const source = context.createBufferSource();
-  source.buffer = buffer;
-  source.connect(context.destination);
-  source.start(1, 0, 0.001);
+  if(!audio.context)
+    audio.context = new AudioContext();
 }
 
 audio.say = function(message) {
@@ -76,23 +80,23 @@ function rotor(brush, rotor, freq) {
   noise = make_buffer(fill_hihat, {});
   noise.loop = true;
 
-  var filter1 = context.createBiquadFilter();
+  var filter1 = audio.context.createBiquadFilter();
   filter1.type = "bandpass";
   filter1.frequency.value = 4000;
   filter1.Q.value = 1;
   noise.connect(filter1);
 
-  gain1 = context.createGain();
+  gain1 = audio.context.createGain();
   gain1.gain.value = brush;
   filter1.connect(gain1);
 
   constant = make_buffer(fill_one, {});
   constant.loop = true;
-  gain2 = context.createGain();
+  gain2 = audio.context.createGain();
   gain2.gain.value = rotor;
   constant.connect(gain2);
 
-  gain3 = context.createGain();
+  gain3 = audio.context.createGain();
   gain3.gain.value = 0;
   gain1.connect(gain3);
   gain2.connect(gain3);
@@ -101,7 +105,8 @@ function rotor(brush, rotor, freq) {
   drive.loop = true;
   drive.connect(gain3.gain);
 
-  gain3.connect(context.destination);
+  gain3.connect(audio.context.destination);
+  audio.record(gain3);
 }
 
 function fill_one(t, env, state) {
@@ -142,47 +147,6 @@ function gain(level) {
   if(gain2) gain2.gain.value = level * 0.2;
 }
 
-
-//https://sonoport.github.io/synthesising-sounds-webaudio.html
-audio.kick = function(gain) {
-  if(!context)
-    return;
-  var audioContext = context;
-  var osc = audioContext.createOscillator();
-  var osc2 = audioContext.createOscillator();
-  var gainOsc = audioContext.createGain();
-  var gainOsc2 = audioContext.createGain();
-
-  osc.type = "triangle";
-  osc2.type = "sine";
-
-  gainOsc.gain.setValueAtTime(gain, audioContext.currentTime);
-  gainOsc.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
-  
-  gainOsc2.gain.setValueAtTime(gain, audioContext.currentTime);
-  gainOsc2.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
-  
-  osc.frequency.setValueAtTime(120, audioContext.currentTime);
-  osc.frequency.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
-
-  osc2.frequency.setValueAtTime(50, audioContext.currentTime);
-  osc2.frequency.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
-
-  osc.connect(gainOsc);
-  osc2.connect(gainOsc2);
-  gainOsc.connect(audioContext.destination);
-  gainOsc2.connect(audioContext.destination);
-
-  osc.start(audioContext.currentTime);
-  osc2.start(audioContext.currentTime);
-
-  osc.stop(audioContext.currentTime + 0.5);
-  osc2.stop(audioContext.currentTime + 0.5);
-};
-
-export default audio;
-
-
 // audio.thump = function() {
 //   drum(fill_thump, {a: 0.2, d: 0.1, s: 0.3, r: 0.2, sustain: 0.5});
 // }
@@ -200,20 +164,20 @@ export default audio;
 // }
 
 function make_buffer(fill, env) {
-    var count = context.sampleRate * 2;
-    var buffer = context.createBuffer(1, count, context.sampleRate);
+  var count = audio.context.sampleRate * 2;
+  var buffer = audio.context.createBuffer(1, count, audio.context.sampleRate);
 
-    var data = buffer.getChannelData(0 /* channel */);
-    var state = {};
-    var prev_random = 0.0;
-    for (var i = 0; i < count; i++) {
-        var t = i / context.sampleRate;
-        data[i] = fill(t, env, state);
-    }
+  var data = buffer.getChannelData(0 /* channel */);
+  var state = {};
+  var prev_random = 0.0;
+  for (var i = 0; i < count; i++) {
+      var t = i / audio.context.sampleRate;
+      data[i] = fill(t, env, state);
+  }
 
-    var source = context.createBufferSource();
-    source.buffer = buffer;
-    return source;
+  var source = audio.context.createBufferSource();
+  source.buffer = buffer;
+  return source;
 }
 
 // function fill_thump(t, env, state) {
@@ -232,17 +196,59 @@ function make_buffer(fill, env) {
 // }
 
 function fill_hihat(t, env, state) {
-    var prev_random = state.prev_random || 0;
-    var next_random = Math.random() * 2 - 1;
-    var curr = (3*next_random - prev_random) / 2;
-    prev_random = next_random;
-    return curr;
+  var prev_random = state.prev_random || 0;
+  var next_random = Math.random() * 2 - 1;
+  var curr = (3*next_random - prev_random) / 2;
+  prev_random = next_random;
+  return curr;
 }
 
 // function drum(fill, env) {
 //     var source = make_buffer(fill, env);
-//     var gain = adsr(context.currentTime, env.a, env.d, env.s, env.r, env.sustain);
+//     var gain = adsr(audio.context.currentTime, env.a, env.d, env.s, env.r, env.sustain);
 //     source.connect(gain);
-//     gain.connect(context.destination);
+//     gain.connect(audio.context.destination);
 //     source.start();
 // }
+
+//https://sonoport.github.io/synthesising-sounds-webaudio.html
+audio.kick = function(gain) {
+  if(!audio.context)
+    return;
+  var audioContext = audio.context;
+  var osc = audio.context.createOscillator();
+  var osc2 = audio.context.createOscillator();
+  var gainOsc = audio.context.createGain();
+  var gainOsc2 = audio.context.createGain();
+
+  osc.type = "triangle";
+  osc2.type = "sine";
+
+  gainOsc.gain.setValueAtTime(gain, audio.context.currentTime);
+  gainOsc.gain.exponentialRampToValueAtTime(0.001, audio.context.currentTime + 0.5);
+  
+  gainOsc2.gain.setValueAtTime(gain, audio.context.currentTime);
+  gainOsc2.gain.exponentialRampToValueAtTime(0.001, audio.context.currentTime + 0.5);
+  
+  osc.frequency.setValueAtTime(120, audio.context.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(0.001, audio.context.currentTime + 0.5);
+
+  osc2.frequency.setValueAtTime(50, audio.context.currentTime);
+  osc2.frequency.exponentialRampToValueAtTime(0.001, audio.context.currentTime + 0.5);
+
+  osc.connect(gainOsc);
+  osc2.connect(gainOsc2);
+  gainOsc.connect(audio.context.destination);
+  gainOsc2.connect(audio.context.destination);
+
+  osc.start(audio.context.currentTime);
+  osc2.start(audio.context.currentTime);
+
+  audio.record(gainOsc);
+  audio.record(gainOsc2);
+
+  osc.stop(audio.context.currentTime + 0.5);
+  osc2.stop(audio.context.currentTime + 0.5);
+};
+
+export default audio;

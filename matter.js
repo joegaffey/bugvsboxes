@@ -2700,6 +2700,9 @@ var matter = createCommonjsModule(function(module, exports) {
             context.fillStyle = "transparent";
             context.fillRect(0, 0, canvas.width, canvas.height);
             context.globalCompositeOperation = "source-over";
+            /* JG edit start*/
+            Events.trigger(render, "beginRender", event);
+            /* JG edit end */
             if (options.hasBounds) {
               for (i = 0; i < allBodies.length; i++) {
                 var body = allBodies[i];

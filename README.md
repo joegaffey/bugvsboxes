@@ -8,6 +8,9 @@ Play [here](https://bugvsboxes.glitch.me/) or [here](https://joegaffey.itch.io/b
 ## Controls
 Mouse, touch or keyboard (arrow keys or z & x).
 
+Record/Stop recording gameplay: Shift + R  
+Hide recorded gameplay video: Shift + X
+
 ## Features
 
 ✅  Advanced physics simulation (matter.js)  
@@ -15,6 +18,7 @@ Mouse, touch or keyboard (arrow keys or z & x).
 ✅  Keyboard and mouse controls  
 ✅  Touch controls  
 ✅  Ladybug to English  
+✅  In-game video capture  
 ⏳  Installable PWA  
 ⏳  Gamepad controls  
 ⏳  Haptics  

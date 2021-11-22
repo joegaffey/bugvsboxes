@@ -9,6 +9,7 @@ import audio from './audio.js';
 import gui from './gui.js';
 import settings from './settings.js';
 import hud from './hud.js';
+import Recorder from './recorder.js';
 
 // module aliases
 const Engine = Matter.Engine,
@@ -22,6 +23,7 @@ const Engine = Matter.Engine,
   Events = Matter.Events;
 
 const containerEl = document.querySelector('#matter');
+const videoEl = document.querySelector('#video');
 
 // create an engine
 const engine = Engine.create();
@@ -32,6 +34,12 @@ const render = Render.create({
   engine: engine,
   options: settings.CONTAINER_OPTIONS
 });
+
+const bgImage = new Image(800, 600);
+bgImage.src = assets.path + 'background.png';
+bgImage.onload = () => {
+  render.options.renderBackground = bgImage;
+}
 
 // run the renderer
 Render.run(render);
@@ -59,6 +67,9 @@ const gState = {
 const ctx = render.canvas.getContext('2d');
 gui.ctx = ctx;
 hud.ctx = ctx;
+
+const recorder = new Recorder(ctx.canvas, videoEl);
+audio.recorder = recorder;
 
 gui.data.nextAction = () => {
   gui.showLevel(gState, () => startLevel(0));
@@ -116,7 +127,7 @@ containerEl.addEventListener('pointermove', (e) => {
 }, false);
 
 const keys = [];
-document.body.addEventListener("keydown", function(e) {
+document.body.addEventListener('keydown', (e) => {
   keys[e.keyCode] = true;
   if(keys[32] || keys[13]) {
     if(gState.running)
@@ -124,14 +135,23 @@ document.body.addEventListener("keydown", function(e) {
     else
       gui.action();
   }
+  if(keys[16] && keys[82]) {
+    if(!recorder.isRecording)
+      recorder.start();
+    else
+      recorder.stop();
+  }
+  if(keys[16] && keys[88]) {
+    recorder.remove();
+  }
 });
-document.body.addEventListener("keyup", function(e) {
+document.body.addEventListener('keyup', (e) => {
   keys[e.keyCode] = false;
 });
 
 /////////////////////  Matter Events setup  ////////////////////////////////////
 
-Events.on(runner, "beforeTick", function(event) {
+Events.on(runner, 'beforeTick', (event) => {
   if(!gState.running)
     return;
   if (keys[90] || keys[37] || gState.isAccel) { car.accel(); };
@@ -140,10 +160,10 @@ Events.on(runner, "beforeTick", function(event) {
   updateCar();
 });
 
-Events.on(engine, 'collisionStart', function(event) {
+Events.on(engine, 'collisionStart', (e) => {
   let doCollision = false;
   let magMax = 0;
-  event.pairs.forEach((pair) => {
+  e.pairs.forEach((pair) => {
     let massA = pair.bodyA.mass;
     if(massA === Infinity) massA = 10000;
     let massB = pair.bodyB.mass;
@@ -160,10 +180,10 @@ Events.on(engine, 'collisionStart', function(event) {
     audio.kick(magMax / 25)
 });
 
-Events.on(engine, 'collisionActive', function(event) {
+Events.on(engine, 'collisionActive', (e) => {
   const platformBoxes = [];
   let totalWeight = 0;
-  event.pairs.forEach((pair) => {
+  e.pairs.forEach((pair) => {
     gState.boxes.forEach((box) => {
       if(pair.bodyA === box || pair.bodyB === box)
         if(platformBoxes.indexOf(box) < 0)
@@ -176,13 +196,19 @@ Events.on(engine, 'collisionActive', function(event) {
   gState.platformLoad = totalWeight * 10;
 });
 
-Events.on(render, "afterRender", () => {
+Events.on(render, 'afterRender', (e) => {
   ctx.fillStyle = render.grassPattern || '#338833';
   ctx.fillRect(10, 560, 780, 80, 40);
   if(gState.running)
     hud.render(gState);
   else
     gui.render();
+});
+
+Events.on(render, 'beginRender', (e) => {
+  if(render.options.renderBackground)
+    ctx.drawImage(render.options.renderBackground, 0, 0, ctx.canvas.width, ctx.canvas.height); 
+  ctx.fillStyle = render.grassPattern || '#338833';
 });
 
 /////////////////////  Game lifecycle  ////////////////////////////////////
