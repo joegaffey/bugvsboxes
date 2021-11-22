@@ -5,7 +5,7 @@ const settings = {
   LOAD_RATIO: 30,
   CONTAINER_OPTIONS: {
     wireframes: false,
-    background: 'url(' + assets.path + 'background.png)'
+    // background: 'url(' + assets.path + 'background.png)'
   },
   GROUND_OPTIONS: { 
     label: 'ground',
