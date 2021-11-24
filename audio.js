@@ -10,12 +10,18 @@ audio.sounds = { fall: { audio: new Audio(assets.path + 'fall.wav'), volume: 0.3
                  explode: { audio: new Audio(assets.path + 'explode.wav'), volume: 0.2 }}; //Explosion 2
 
 audio.play = function(sound) {
-  const snd = audio.sounds[sound].audio.cloneNode();
-  snd.volume = audio.sounds[sound].volume;
-  const source = audio.context.createMediaElementSource(snd);
-  source.connect(audio.context.destination);
-  audio.record(source);
-  snd.play();
+  if(this.recorder && this.recorder.isRecording) {
+    const snd = audio.sounds[sound].audio.cloneNode();
+    snd.volume = audio.sounds[sound].volume;
+    const source = audio.context.createMediaElementSource(snd);
+    source.connect(audio.context.destination);
+    audio.record(source);
+    snd.play();
+  }
+  else {
+    audio.sounds[sound].audio.volume = audio.sounds[sound].volume;
+    audio.sounds[sound].audio.play();
+  }
 }
 
 audio.record = function(source) {
@@ -125,6 +131,10 @@ function rate(rate) {
 }
 
 audio.engine = {}
+audio.engine.restart = function() {
+  audio.engine.stop();
+  audio.engine.start();
+}
 audio.engine.stop = function() {
   if(noise) noise.stop();
   if(drive) drive.stop();
@@ -240,12 +250,12 @@ audio.kick = function(gain) {
   osc2.connect(gainOsc2);
   gainOsc.connect(audio.context.destination);
   gainOsc2.connect(audio.context.destination);
+  
+  audio.record(gainOsc);
+  audio.record(gainOsc2);
 
   osc.start(audio.context.currentTime);
   osc2.start(audio.context.currentTime);
-
-  audio.record(gainOsc);
-  audio.record(gainOsc2);
 
   osc.stop(audio.context.currentTime + 0.5);
   osc2.stop(audio.context.currentTime + 0.5);
