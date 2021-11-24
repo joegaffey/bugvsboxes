@@ -136,8 +136,11 @@ document.body.addEventListener('keydown', (e) => {
       gui.action();
   }
   if(keys[16] && keys[82]) {
-    if(!recorder.isRecording)
+    if(!recorder.isRecording) {
       recorder.start();
+      if(gState.running)
+        audio.engine.restart();
+    }
     else
       recorder.stop();
   }

@@ -5,7 +5,6 @@ class Recorder {
   constructor(canvas, video) {
     this.canvas = canvas;
     this.video = video;
-    this.audioSources = [];
   }
 
   start() {
@@ -17,9 +16,8 @@ class Recorder {
     
     const videoStream = this.canvas.captureStream(30);
     this.dest = audio.context.createMediaStreamDestination();
-    this.src = audio.context.createBufferSource();
+    this.src = audio.context.createBufferSource();    
     this.addAudioSource(this.src);
-    this.connectAudioSources(this.dest);
     
     let outputTracks = []; 
     outputTracks = outputTracks.concat(videoStream.getTracks());
@@ -42,17 +40,10 @@ class Recorder {
     this.mediaRecorder.start();
   }
 
-  connectAudioSources(destination) {
-    this.audioSources.forEach((source) => {
-      source.connect(destination);
-    });
-  }
-
+  
   addAudioSource(source) {
     if(this.isRecording)
       source.connect(this.dest);
-    else
-      this.audioSources.push(source);
   }
 
   stop() {
