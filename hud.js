@@ -29,6 +29,11 @@ hud.render = function(gState) {
     hud.ctx.font = 'bold 60px Verdana';
     hud.ctx.fillText(hud.countdown.value + 's remaining!', 400, 250);
   }
+  if(gState.powMessage) {
+    hud.ctx.fillStyle = '#dddddd';
+    hud.ctx.font = '30px Verdana';
+    hud.ctx.fillText(gState.powMessage, 400, 175);
+  }
   hud.ctx.restore();
 }
 

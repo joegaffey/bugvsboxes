@@ -1,6 +1,7 @@
 import Matter from './matter.js';
 import assets from './assets.js';
 import audio from './audio.js';
+import settings from './settings.js';
 
 /**
 * Creates a composite with simple car setup of bodies and constraints.
@@ -25,7 +26,6 @@ const Car = function(xx, yy, width, height, wheelSize) {
       wheelBOffset = +80,
       wheelYOffset = 22;
 
-  const bodyTexture = assets.path + 'bug.png';
   const wheelTexture = assets.path + 'wheel.png';
   
   const car = Composite.create({ label: 'car' });   
@@ -44,19 +44,10 @@ const Car = function(xx, yy, width, height, wheelSize) {
     { "x":145, "y":102 }, { "x":154, "y":105 }, { "x":201, "y":105 }, { "x":201, "y":103 } 
   ];
   
-  const bodyOptions = { 
-    collisionFilter: {
-      group: group
-    },
-    density: 0.0002,
-    render: {
-      sprite: {
-        texture: bodyTexture,
-      }
-    }
-  };
-  
-  const body = Bodies.fromVertices(xx, yy, bodyVertices, bodyOptions);
+  const bodyOptions = settings.CAR_BODY_OPTIONS;
+  bodyOptions.collisionFilter = { group: group };
+
+  const body = Bodies.fromVertices(xx, yy, bodyVertices, bodyOptions);  
   
   const wheelA = Bodies.circle(xx + wheelAOffset, yy + wheelYOffset, wheelSize, { 
     collisionFilter: {
