@@ -29,6 +29,40 @@ hud.render = function(gState) {
     hud.ctx.font = 'bold 60px Verdana';
     hud.ctx.fillText(hud.countdown.value + 's remaining!', 400, 250);
   }
+  if(gState.powMessage) {
+    hud.ctx.fillStyle = '#dddddd';
+    hud.ctx.font = '30px Verdana';
+    hud.ctx.fillText(gState.powMessage, 400, 175);
+  }
+  if(hud.speakMessage) {
+    const pos = hud.car.position();
+    hud.drawBubble(pos.x, pos.y, hud.speakMessage);
+  }
+  hud.ctx.restore();
+}
+
+hud.drawBubble = function(x, y, text) {
+  hud.ctx.save();
+  const width = text.length * 12;
+  const height = 50;
+  hud.ctx.fillStyle = 'white';
+  hud.ctx.strokeStyle = 'white';
+  hud.ctx.beginPath();
+  hud.ctx.moveTo(x - width / 2, y - 150);
+  hud.ctx.lineTo(x + width / 2, y - 150);
+  hud.ctx.lineWidth = height;
+  hud.ctx.lineCap = 'round';
+  hud.ctx.stroke();
+  hud.ctx.lineWidth = 0;
+  hud.ctx.beginPath();
+  hud.ctx.moveTo(x - 50, y - 50);
+  hud.ctx.lineTo(x - width / 3 - 20, y + height / 2 - 152);
+  hud.ctx.lineTo(x - width / 3 + 20, y + height / 2 - 152);
+  hud.ctx.fill();
+  hud.ctx.fillStyle = '#444';
+  hud.ctx.shadowColor = '#aaa'
+  hud.ctx.font = '24px Verdana';
+  hud.ctx.fillText(text, x, y - 140);
   hud.ctx.restore();
 }
 

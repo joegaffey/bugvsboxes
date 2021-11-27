@@ -10,6 +10,8 @@ import gui from './gui.js';
 import settings from './settings.js';
 import hud from './hud.js';
 import Recorder from './recorder.js';
+import Power from './power.js';
+import SpeakPower from './speakPower.js';
 
 // module aliases
 const Engine = Matter.Engine,
@@ -52,13 +54,13 @@ runner.isFixed = true;
 Runner.run(runner, engine);
 
 let car;
-// Render.lookAt(render, car, {x: 200, y:100})
 
 const gState = {
   platformLoad: 0,
   isAccel: false,
   isBrake: false,
   boxes: [],
+  powers: [],
   level: levels[0],
   messageText:'',
   running: false
@@ -91,6 +93,7 @@ function setupWorld() {
   const CAR_SCALE = 0.9;
   const ground = Bodies.rectangle(400, 610, 780, 50, settings.GROUND_OPTIONS);
   car = Composite.create(new Car(400, 530, 300 * CAR_SCALE, 50 *  CAR_SCALE, 30 *  CAR_SCALE));
+  hud.car = car;
   Composite.add(engine.world, [car, ground]);
 }
 
@@ -102,8 +105,36 @@ function setupWorld() {
   }, rand);
 }());
 
+// (function powerLoop() {
+//   const rand = gState.level.POW_MIN_RATE || 2000 + Math.random() * gState.level.POW_VAR_RATE || 2000;
+//   setTimeout(function() {
+//     const pow = getLevelPow();
+//     if(pow)
+//       addPower(pow);
+//     powerLoop();  
+//   }, rand);
+// }());
+
 window.onresize = resize;
 resize();
+
+function getLevelPow() {
+  let pow = null;
+  if(gState.level.POWS) {
+    let pows = [];
+    gState.level.POWS.forEach(pow => {
+      if(pow.probability > 0) {
+        const arr = new Array(pow.probability);
+        arr.fill(pow.type);
+        pows = pows.concat(arr);
+      }
+    });
+    const type = pows[Math.floor(Math.random() * pows.length)];
+    pow = settings.POWERS.find(x => x.type === type);
+    pow.active = gState.level.POWS.find(x => x.type === type).active;
+  }
+  return pow;
+}
 
 /////////////////////  Controls setup  ////////////////////////////////////
 
@@ -161,6 +192,7 @@ Events.on(runner, 'beforeTick', (event) => {
   if (keys[88] || keys[39] || gState.isBrake) { car.brake(); };
   updateBoxes();
   updateCar();
+  updatePowers();
 });
 
 Events.on(engine, 'collisionStart', (e) => {
@@ -178,9 +210,16 @@ Events.on(engine, 'collisionStart', (e) => {
     const threshold = 2;
     if(mag > threshold) doCollision = true;
     if(mag > magMax) magMax = mag;
+    if(doCollision)
+      audio.kick(magMax / 25)
+    if(pair.bodyA.label === 'pow' && pair.bodyB.label === 'carBody' || 
+       pair.bodyA.label === 'carBody' && pair.bodyB.label === 'pow') {
+        if(pair.bodyA.label === 'pow')
+          pair.bodyA.power.hit();
+        else
+          pair.bodyB.power.hit();
+      }
   });
-  if(doCollision)
-    audio.kick(magMax / 25)
 });
 
 Events.on(engine, 'collisionActive', (e) => {
@@ -202,6 +241,7 @@ Events.on(engine, 'collisionActive', (e) => {
 Events.on(render, 'afterRender', (e) => {
   ctx.fillStyle = render.grassPattern || '#338833';
   ctx.fillRect(10, 560, 780, 80, 40);
+
   if(gState.running)
     hud.render(gState);
   else
@@ -332,11 +372,50 @@ function addBox() {
       box = Bodies.rectangle(x1 + Math.random() * x2, y, l, l, largeCrateOptions);
     
     Body.rotate(box, Math.random());
+    Body.setAngularVelocity(box, ((Math.random()) * 2 - 1) * 0.02);
     gState.boxes.push(box);
     Composite.add(engine.world, [box]);
     gState.level.remaining--;
   }
 }
+
+function addPower(powConfig) {
+  if(gState.level.remaining > 0 &&  gState.running) {
+    let pow = null;
+    if(powConfig.type === 'SPEAK')
+      pow = new SpeakPower(Math.random() * 800, 0);
+    else if(powConfig.type === 'AWD')
+      pow = new Power(powConfig, Math.random() * 800, 0, () => { awdAction(); });
+    else
+      pow = new Power(powConfig, Math.random() * 800, 0);
+    Composite.add(engine.world, [pow.body]);
+    gState.powers.push(pow);
+  }
+}
+
+function awdAction() {
+  Car.awd = true;
+}
+
+function updatePowers() {
+  gState.powers.forEach((pow, i) => {
+    if(pow.deathCount && pow.deathCount > 0) {
+      pow.deathCount--;
+      pow.body.render.sprite.xScale = pow.body.render.sprite.yScale +=  0.15 / pow.deathCount;
+      if(pow.deathCount <= 0) {
+        if(pow.options.actMessage) {
+          gState.powMessage = pow.options.actMessage;
+          setTimeout(() => { gState.powMessage = null; }, 2000)
+        }
+        Composite.remove(engine.world, pow.body);
+        gState.boxes.splice(i, 1);
+        if(pow.action)
+          pow.action.call();
+      }
+    }
+  });
+}
+
 
 ///////////////////////// Car controls ////////////////////////////
 

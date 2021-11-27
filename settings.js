@@ -20,10 +20,23 @@ const settings = {
   // Screen settings
   SCREEN_RATIO: 1.333,
   
+  // Car settings
+  CAR_BODY_OPTIONS: { 
+    label: 'carBody',
+    density: 0.0002,
+    restitution: 0.5,
+    render: {
+      sprite: {
+        texture: assets.path + 'bug.png',
+      }
+    }
+  },
+
   // Box settings
   BOX_OPTIONS : { 
     label: 'box',
     friction: 0.001,
+    restitution: 0.3,
     render: {
       strokeStyle: '#00ff00',
       sprite: {
@@ -39,7 +52,33 @@ const settings = {
   LARGE_BOX_SIZE: 100,
   DROP_MIN_X: 30,
   DROP_MAX_X: 740,
-  DROP_Y: 0
+  DROP_Y: 0,
+
+  // Power up/down settings
+  POW_OPTIONS: { 
+    label: 'pow',
+    friction: 0.001,
+    density: 0.0001,
+    restitution: 0.8,
+    render: {
+      strokeStyle: 'red',
+      lineWidth: 3,
+      fillStyle: '#338833'
+    }
+  },
+
+  POWERS: [
+    { type: 'SPEAK', icon: '💬'},
+    { type: 'EXPLODE', icon: '💥', readyMessage: 'Tick...tick...tick...', actMessage: '💥💥💥 Boom! 💥💥💥'},
+    { type: 'SPEEDUP', icon: '⚡', actMessage: 'I am speed! ⚡'},
+    { type: 'SLEEP', icon: '💤', actMessage: '💤 Sleepy time...'},
+    { type: 'CAR', icon: '🚖', actMessage: '1UP 🚖'},
+    { type: 'MAGNET', icon: '🧲', actMessage: 'So attractive! 🧲'},
+    { type: 'POWER', icon: '💪', actMessage: '💪 Moar Powerrr! 💪'},
+    { type: 'GRAVITY', icon: '👽', actMessage: '👽 Mars gravity!'},
+    { type: 'AWD', icon: '🚙', actMessage: '🚙 4X4 🚙'},
+    { type: 'GRIP', icon: '🥾', actMessage: '🥾 Get a grip!'},
+  ]
 };
 
 export default settings;

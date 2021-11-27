@@ -7,6 +7,12 @@ var levels = [{
     MIN_RATE: 1000,
     BOXES: 10,
     SIZES: { SMALL: 10, MEDIUM: 0, LARGE: 0 },
+    POWS: [ 
+      { type: 'SPEAK', probability: 0, active: true },
+      { type: 'AWD', probability: 10, active: true }
+    ],
+    POW_MIN_RATE: 4000,
+    POW_VAR_RATE: 3000,
     SAY_COMPLETE: ['Well done!', 'e:😁']
   },
   { 
@@ -18,6 +24,14 @@ var levels = [{
     MIN_RATE: 800,
     BOXES: 15,
     SIZES: { SMALL: 9, MEDIUM: 1, LARGE: 0 },
+    POWS: [ 
+      { type: 'AWD', probability: 2 },
+      { type: 'SLEEP', probability: 3 },
+      { type: 'POWER', probability: 3 },
+      { type: 'SPEEDUP', probability: 2 }
+    ],
+    POW_MIN_RATE: 4000,
+    POW_VAR_RATE: 3000,
     SAY_COMPLETE: ['Great job!', 'e:🥳']
   },
   {
