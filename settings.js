@@ -21,6 +21,17 @@ const settings = {
   SCREEN_RATIO: 1.333,
   
   // Car settings
+  CAR_START_TORQUE: 0.15,
+  CAR_MAX_TORQUE: 0.2,
+  CAR_MAX_TORQUE_AWD: 0.25,
+  CAR_MIN_TORQUE: 0.1,
+  CAR_TORQUE_STEP: 0.005,
+  
+  CAR_START_GRIP: 0.2,
+  CAR_MIN_GRIP: 0.1,
+  CAR_MAX_GRIP: 0.8,
+  CAR_GRIP_STEP: 0.025,  
+  
   CAR_BODY_OPTIONS: { 
     label: 'carBody',
     density: 0.0002,
@@ -67,17 +78,17 @@ const settings = {
     }
   },
 
-  POW_TYPE: { EXPLODE: 1, SPEEDUP: 2, SLEEP: 3, CAR: 4, MAGNET: 5, POWER: 6, GRAVITY: 7, AWD: 8, SPEAK: 9 },
   POWERS: [
-    { id: 1, icon: '💥', readyMessage: 'Tick...tick...tick...', actMessage: '💥💥💥 Boom! 💥💥💥'},
-    { id: 2, icon: '💨', actMessage: 'Turbo Engaged! 💨'},
-    { id: 3, icon: '💤', actMessage: '💤 Sleepy time... 💤'},
-    { id: 4, icon: '🚖', actMessage: '1UP 🚖'},
-    { id: 4, icon: '🧲', actMessage: 'So attractive! 🧲'},
-    { id: 5, icon: '💪', actMessage: '💪 Moar Powerrr! 💪'},
-    { id: 6, icon: '👽', actMessage: '👽 Drivin on da moon! 👽'},
-    { id: 7, icon: '🚙', actMessage: '4 Wheel Drive Baby!!! 🚙'},
-    { id: 8, icon: '💬'}
+    { type: 'SPEAK', icon: '💬'},
+    { type: 'POWER', icon: '💪', actMessage: '💪 Powerrr! 💪'},
+    { type: 'AWD', icon: '🚙', actMessage: '🚙 4X4 🚙'},
+    { type: 'GRIP', icon: '🥾', actMessage: '🥾 Get a grip!'},
+    // { type: 'EXPLODE', icon: '💥', readyMessage: 'Tick...tick...tick...', actMessage: '💥💥💥 Boom! 💥💥💥'},
+    // { type: 'SPEEDUP', icon: '⚡', actMessage: 'I am speed! ⚡'},
+    // { type: 'SLEEP', icon: '💤', actMessage: '💤 Sleepy time...'},
+    // { type: 'CAR', icon: '🚖', actMessage: '1UP 🚖'},
+    // { type: 'MAGNET', icon: '🧲', actMessage: 'So attractive! 🧲'},
+    // { type: 'GRAVITY', icon: '👽', actMessage: '👽 Mars gravity!'},
   ]
 };
 

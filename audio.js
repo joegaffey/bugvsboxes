@@ -149,9 +149,9 @@ audio.engine.start = function() {
   drive.start();
   constant.start();
 }
-audio.engine.power = function(pow) {
-  rate(pow);
-  gain(pow / 20);
+audio.engine.power = function(power) {
+  rate(power);
+  gain(power / 20);
 }
 
 function gain(level) {
