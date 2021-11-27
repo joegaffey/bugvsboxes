@@ -88,5 +88,4 @@ hud.endCountdown = function() {
   hud.countdown = null;
 }
 
-
 export default hud;

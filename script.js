@@ -315,6 +315,23 @@ function updateCar() {
   }
 }
 
+function updatePowers() {
+  gState.powers.forEach((pow, i) => {
+    if(pow.deathCount && pow.deathCount > 0) {
+      pow.deathCount--;
+      pow.body.render.sprite.xScale = pow.body.render.sprite.yScale +=  0.15 / pow.deathCount;
+      if(pow.deathCount <= 0) {
+        if(pow.options.actMessage) {
+          gState.powMessage = pow.options.actMessage;
+          setTimeout(() => { gState.powMessage = null; }, 2000)
+        }
+        Composite.remove(engine.world, pow.body);
+        gState.boxes.splice(i, 1);
+      }
+    }
+  });
+}
+
 function updateBoxes() {
   if(gState.platformLoad >= gState.level.MAX_BOXES * settings.LOAD_RATIO) {
     if(!hud.countdown)
@@ -415,7 +432,6 @@ function updatePowers() {
     }
   });
 }
-
 
 ///////////////////////// Car controls ////////////////////////////
 
