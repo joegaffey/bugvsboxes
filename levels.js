@@ -8,8 +8,9 @@ var levels = [{
     BOXES: 10,
     SIZES: { SMALL: 10, MEDIUM: 0, LARGE: 0 },
     POWS: [ 
-      { type: 'SPEAK', probability: 0, active: true },
-      { type: 'AWD', probability: 10, active: true }
+      { type: 'SPEAK', probability: 8, active: 1, good: 1 },
+      { type: 'POWER', probability: 1, active: 0.5, good: 0.5},
+      { type: 'GRIP', probability: 1, active: 0.5, good: 0.5},
     ],
     POW_MIN_RATE: 4000,
     POW_VAR_RATE: 3000,
@@ -25,13 +26,11 @@ var levels = [{
     BOXES: 15,
     SIZES: { SMALL: 9, MEDIUM: 1, LARGE: 0 },
     POWS: [ 
-      { type: 'AWD', probability: 2 },
-      { type: 'SLEEP', probability: 3 },
-      { type: 'POWER', probability: 3 },
-      { type: 'SPEEDUP', probability: 2 }
+      { type: 'POWER', probability: 1, active: 0.5, good: 0.5},
+      { type: 'GRIP', probability: 1, active: 0.5, good: 0.5},
     ],
-    POW_MIN_RATE: 4000,
-    POW_VAR_RATE: 3000,
+    POW_MIN_RATE: 10000,
+    POW_VAR_RATE: 5000,
     SAY_COMPLETE: ['Great job!', 'e:🥳']
   },
   {
@@ -43,6 +42,13 @@ var levels = [{
     MIN_RATE: 700,
     BOXES: 25,
     SIZES: { SMALL: 8, MEDIUM: 2, LARGE: 0 },
+    POWS: [ 
+      { type: 'AWD', probability: 1, active: 0.5, good: 0.8},
+      { type: 'POWER', probability: 3, active: 0.5, good: 0.5},
+      { type: 'GRIP', probability: 3, active: 0.5, good: 0.5},
+    ],
+    POW_MIN_RATE: 10000,
+    POW_VAR_RATE: 5000,
     SAY_COMPLETE: ['Wohoo!!!', 'e:💯']
   },
   { 
@@ -65,6 +71,13 @@ var levels = [{
     MIN_RATE: 500,
     BOXES: 40,
     SIZES: { SMALL: 6, MEDIUM: 4, LARGE: 0 },
+    POWS: [ 
+      { type: 'AWD', probability: 1, active: 0.5, good: 0.8},
+      { type: 'POWER', probability: 3, active: 0.5, good: 0.5},
+      { type: 'GRIP', probability: 3, active: 0.5, good: 0.5},
+    ],
+    POW_MIN_RATE: 10000,
+    POW_VAR_RATE: 5000,
     SAY_COMPLETE: ['Noice!', 'e:🧐']
   },
   { 
@@ -76,6 +89,13 @@ var levels = [{
     MIN_RATE: 500,
     BOXES: 45,
     SIZES: { SMALL: 5, MEDIUM: 5, LARGE: 0 },
+    POWS: [ 
+      { type: 'AWD', probability: 1, active: 0.5, good: 0.8},
+      { type: 'POWER', probability: 3, active: 0.5, good: 0.5},
+      { type: 'GRIP', probability: 3, active: 0.5, good: 0.5},
+    ],
+    POW_MIN_RATE: 10000,
+    POW_VAR_RATE: 5000,
     SAY_COMPLETE: ['Phew!', 'e:😵‍💫']
   },
   { 
@@ -98,6 +118,13 @@ var levels = [{
     MIN_RATE: 500,
     BOXES: 45,
     SIZES: { SMALL: 3, MEDIUM: 5, LARGE: 2 },
+    POWS: [ 
+      { type: 'AWD', probability: 1, active: 0.5, good: 0.8},
+      { type: 'POWER', probability: 3, active: 0.5, good: 0.5},
+      { type: 'GRIP', probability: 3, active: 0.5, good: 0.5},
+    ],
+    POW_MIN_RATE: 10000,
+    POW_VAR_RATE: 5000,
     SAY_COMPLETE: ['Wow, you are good!', 'e:😇']
   },
   { 
@@ -109,6 +136,13 @@ var levels = [{
     MIN_RATE: 500,
     BOXES: 45,
     SIZES: { SMALL: 2, MEDIUM: 5, LARGE: 3 },
+    POWS: [ 
+      { type: 'AWD', probability: 1, active: 0.5, good: 0.8},
+      { type: 'POWER', probability: 3, active: 0.5, good: 0.5},
+      { type: 'GRIP', probability: 3, active: 0.5, good: 0.5},
+    ],
+    POW_MIN_RATE: 10000,
+    POW_VAR_RATE: 5000,
     SAY_COMPLETE: ['Not sure how much', 'more I can take!', 'e:😟']
   },
   { 
@@ -120,6 +154,13 @@ var levels = [{
     MIN_RATE: 500,
     BOXES: 45,
     SIZES: { SMALL: 1, MEDIUM: 5, LARGE: 4 },
+    POWS: [ 
+      { type: 'AWD', probability: 1, active: 0.5, good: 0.8},
+      { type: 'POWER', probability: 3, active: 0.5, good: 0.5},
+      { type: 'GRIP', probability: 3, active: 0.5, good: 0.5},
+    ],
+    POW_MIN_RATE: 10000,
+    POW_VAR_RATE: 5000,
     SAY_COMPLETE:  ['Let\'s go!!!', 'e:💥']
   },
   { 
@@ -142,6 +183,13 @@ var levels = [{
     MIN_RATE: 300,
     BOXES: 45,
     SIZES: { SMALL: 10, MEDIUM: 0, LARGE: 0 },
+    POWS: [ 
+      { type: 'AWD', probability: 1, active: 0.5, good: 0.8},
+      { type: 'POWER', probability: 3, active: 0.5, good: 0.5},
+      { type: 'GRIP', probability: 3, active: 0.5, good: 0.5},
+    ],
+    POW_MIN_RATE: 10000,
+    POW_VAR_RATE: 5000,
     SAY_COMPLETE:  ['Thank You!', 'e:❤ ❤ ❤ ❤ ❤']
   }  
 ];

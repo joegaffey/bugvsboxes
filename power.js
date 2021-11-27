@@ -9,27 +9,31 @@ export default class Power {
     if(action)
       this.action = action;
     this.options = options;
-    let ringColor = 'white';
-    if(this.options.active)
-      ringColor = 'green';
-    this.body.render.sprite.texture = this.getTexture(this.options.icon, ringColor);
+    this.ringColor = 'white';
+    this.active = (this.options.active === 1) || this.options.active > Math.random();
+    this.good = (this.options.good === 1) || this.options.good > Math.random();
+    if(this.active) {
+      this.good ? this.ringColor = 'green' : this.ringColor = 'red';
+    }
+    this.body.render.sprite.texture = this.getTexture(this.options.icon, this.ringColor);
     this.body.render.sprite.xScale = this.body.render.sprite.yScale = 0.5;
     Matter.Body.setAngularVelocity(this.body, (Math.random() * 2 - 1) * 0.05);
   }
 
   hit() {
-    if(this.options.active) {
+    if(this.active) {
       audio.play('pop');
-      this.options.active = false;
+      this.active = false;
       this.deathCount = 10;
     } 
     else {
       audio.play('beep');
+      this.good ? this.ringColor = 'green' : this.ringColor = 'red';
       this.body.render.sprite.texture = this.getTexture(
         this.options.icon,
-        'green'
+        this.ringColor
       );
-      this.options.active = true;
+      this.active = true;
     }
   }
 

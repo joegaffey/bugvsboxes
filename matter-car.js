@@ -53,7 +53,7 @@ const Car = function(xx, yy, width, height, wheelSize) {
     collisionFilter: {
       group: group
     },
-    friction: 0.4,
+    friction: Car.grip,
     render: {
       sprite: {
         texture: wheelTexture,
@@ -67,7 +67,7 @@ const Car = function(xx, yy, width, height, wheelSize) {
     collisionFilter: {
       group: group
     },
-    friction: 0.4,
+    friction: Car.grip,
     render: {
       sprite: {
         texture: wheelTexture,
@@ -94,30 +94,28 @@ const Car = function(xx, yy, width, height, wheelSize) {
   });
   
   car.brake = function() {
-    let torque = 0.15;
-    if(Car.awd || wheelA.position.x < 10) {
-      torque /= 2;
-      wheelB.torque = wheelA.torque += torque;
+    if(Car.AWD || wheelA.position.x < 10) {
+      wheelB.torque += Car.torque / 2; 
+      wheelA.torque += Car.torque / 2;
     }
     else 
-      wheelB.torque += torque;
+      wheelB.torque += Car.torque;
   }
   
   car.accel = function() {
-    let torque = 0.15;
-    if(Car.awd || wheelA.position.x > 790) {
-      torque /= 2;
-      wheelB.torque = wheelA.torque -= torque;
+    if(Car.AWD || wheelB.position.x > 790) {
+      wheelB.torque -= Car.torque / 2; 
+      wheelA.torque -= Car.torque / 2;
     }
     else 
-      wheelB.torque -= torque; 
+      wheelB.torque -= Car.torque; 
   }
   
   car.updateEngine = function() {
-    let pow = Math.abs(wheelB.angularVelocity * 20);
-    if(pow < 1) pow = 1;
-    if(pow > 8) pow = 8;
-    audio.engine.power(pow);
+    let power = Math.abs(wheelB.angularVelocity * 20);
+    if(power < 1) power = 1;
+    if(power > 8) power = 8;
+    audio.engine.power(power);
   }
   
   car.position = function() {
@@ -132,5 +130,57 @@ const Car = function(xx, yy, width, height, wheelSize) {
 
   return car;
 };
+
+Car.enableAWD = function(){
+  Car.AWD = true;
+}
+Car.disableAWD = function(){
+  Car.AWD = false;
+  if(Car.torque > settings.CAR_MAX_TORQUE)
+    Car.torque = settings.CAR_MAX_TORQUE;
+}
+
+Car.increaseTorque = function() {
+  if(Car.AWD && Car.torque < settings.CAR_MAX_TORQUE_AWD) {
+    Car.torque += settings.CAR_TORQUE_STEP;
+    if(Car.torque > settings.CAR_MAX_TORQUE_AWD)
+      Car.torque = settings.CAR_MAX_TORQUE_AWD;
+  }
+  else if(Car.torque < settings.CAR_MAX_TORQUE) {
+    Car.torque += settings.CAR_TORQUE_STEP;
+    if(Car.torque > settings.CAR_MAX_TORQUE)
+      Car.torque = settings.CAR_MAX_TORQUE;
+  }
+}
+Car.decreaseTorque = function() {
+  if(Car.torque > settings.CAR_MIN_TORQUE)
+    Car.torque -= settings.CAR_TORQUE_STEP;
+  if(Car.torque < settings.CAR_MIN_TORQUE)
+    Car.torque = settings.CAR_MIN_TORQUE;
+}
+Car.getTorque = function() {
+  if(Car.AWD)
+    return Math.round(Car.torque / settings.CAR_MAX_TORQUE_AWD * 100);
+  else
+    return Math.round(Car.torque / settings.CAR_MAX_TORQUE * 100);
+}
+
+Car.increaseGrip = function() {
+  if(Car.grip < settings.CAR_MAX_GRIP)
+    Car.grip += settings.CAR_GRIP_STEP;
+}
+Car.decreaseGrip = function() {
+  if(Car.grip > settings.CAR_MIN_GRIP)
+    Car.grip -= settings.CAR_GRIP_STEP;
+}
+Car.getGrip = function() {
+  return Math.round(Car.grip / settings.CAR_MAX_GRIP * 100);
+}
+
+Car.reset = function() {
+  Car.AWD = false;
+  Car.grip = settings.CAR_START_GRIP;
+  Car.torque = settings.CAR_START_TORQUE;
+}
 
 export default Car;

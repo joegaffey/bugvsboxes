@@ -54,7 +54,8 @@ runner.isFixed = true;
 Runner.run(runner, engine);
 
 let car;
-
+Car.reset();
+  
 const gState = {
   platformLoad: 0,
   isAccel: false,
@@ -105,15 +106,15 @@ function setupWorld() {
   }, rand);
 }());
 
-// (function powerLoop() {
-//   const rand = gState.level.POW_MIN_RATE || 2000 + Math.random() * gState.level.POW_VAR_RATE || 2000;
-//   setTimeout(function() {
-//     const pow = getLevelPow();
-//     if(pow)
-//       addPower(pow);
-//     powerLoop();  
-//   }, rand);
-// }());
+(function powerLoop() {
+  const rand = gState.level.POW_MIN_RATE || 2000 + Math.random() * gState.level.POW_VAR_RATE || 2000;
+  setTimeout(function() {
+    const pow = getLevelPow();
+    if(pow)
+      addPower(pow);
+    powerLoop();  
+  }, rand);
+}());
 
 window.onresize = resize;
 resize();
@@ -131,7 +132,10 @@ function getLevelPow() {
     });
     const type = pows[Math.floor(Math.random() * pows.length)];
     pow = settings.POWERS.find(x => x.type === type);
-    pow.active = gState.level.POWS.find(x => x.type === type).active;
+    const powConfig = gState.level.POWS.find(x => x.type === type)
+    pow.active = powConfig.active;
+    pow.good = powConfig.good;
+    pow.random = powConfig.random;
   }
   return pow;
 }
@@ -300,6 +304,7 @@ function endLevel() {
 }
 
 function restart() {
+  Car.reset();
   gState.level = levels[0];
   gState.platformLoad = 0;
   gui.showLevel(gState, () => startLevel(0))
@@ -313,23 +318,6 @@ function updateCar() {
     audio.play('explode');
     endGame(2);    
   }
-}
-
-function updatePowers() {
-  gState.powers.forEach((pow, i) => {
-    if(pow.deathCount && pow.deathCount > 0) {
-      pow.deathCount--;
-      pow.body.render.sprite.xScale = pow.body.render.sprite.yScale +=  0.15 / pow.deathCount;
-      if(pow.deathCount <= 0) {
-        if(pow.options.actMessage) {
-          gState.powMessage = pow.options.actMessage;
-          setTimeout(() => { gState.powMessage = null; }, 2000)
-        }
-        Composite.remove(engine.world, pow.body);
-        gState.boxes.splice(i, 1);
-      }
-    }
-  });
 }
 
 function updateBoxes() {
@@ -402,16 +390,26 @@ function addPower(powConfig) {
     if(powConfig.type === 'SPEAK')
       pow = new SpeakPower(Math.random() * 800, 0);
     else if(powConfig.type === 'AWD')
-      pow = new Power(powConfig, Math.random() * 800, 0, () => { awdAction(); });
-    else
-      pow = new Power(powConfig, Math.random() * 800, 0);
-    Composite.add(engine.world, [pow.body]);
-    gState.powers.push(pow);
+      pow = new Power(powConfig, Math.random() * 800, 0, () => { 
+        (powConfig.good > Math.random() ? Car.enableAWD() : Car.disableAWD());
+        const message = (powConfig.good > Math.random() ? 'Enabled' : 'Disabled');
+        gState.powMessage = '🚙 4X4 ' + message + '!';
+      });
+    else if(powConfig.type === 'POWER')
+      pow = new Power(powConfig, Math.random() * 800, 0, () => { 
+        (powConfig.good > Math.random() ? Car.increaseTorque() : Car.decreaseTorque()); 
+        gState.powMessage = '💪 Engine at ' + Car.getTorque() + '% power!';
+      });
+    else if(powConfig.type === 'GRIP')
+      pow = new Power(powConfig, Math.random() * 800, 0, () => { 
+        (powConfig.good > Math.random() ? Car.increaseGrip() : Car.decreaseGrip()); 
+        gState.powMessage = '🥾 Tyres at ' + Car.getGrip() + '%!';
+      });
+    if(pow) {
+      Composite.add(engine.world, [pow.body]);
+      gState.powers.push(pow);
+    }
   }
-}
-
-function awdAction() {
-  Car.awd = true;
 }
 
 function updatePowers() {
@@ -432,6 +430,7 @@ function updatePowers() {
     }
   });
 }
+
 
 ///////////////////////// Car controls ////////////////////////////
 
