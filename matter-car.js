@@ -166,10 +166,12 @@ Car.getTorque = function() {
 }
 
 Car.increaseGrip = function() {
+  console.log('+1')
   if(Car.grip < settings.CAR_MAX_GRIP)
     Car.grip += settings.CAR_GRIP_STEP;
 }
 Car.decreaseGrip = function() {
+  console.log('-1')
   if(Car.grip > settings.CAR_MIN_GRIP)
     Car.grip -= settings.CAR_GRIP_STEP;
 }

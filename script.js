@@ -391,18 +391,18 @@ function addPower(powConfig) {
       pow = new SpeakPower(Math.random() * 800, 0);
     else if(powConfig.type === 'AWD')
       pow = new Power(powConfig, Math.random() * 800, 0, () => { 
-        (powConfig.good > Math.random() ? Car.enableAWD() : Car.disableAWD());
-        const message = (powConfig.good > Math.random() ? 'Enabled' : 'Disabled');
+        (pow.good ? Car.enableAWD() : Car.disableAWD());
+        const message = (pow.good ? 'Enabled' : 'Disabled');
         gState.powMessage = '🚙 4X4 ' + message + '!';
       });
     else if(powConfig.type === 'POWER')
       pow = new Power(powConfig, Math.random() * 800, 0, () => { 
-        (powConfig.good > Math.random() ? Car.increaseTorque() : Car.decreaseTorque()); 
+        (pow.good ? Car.increaseTorque() : Car.decreaseTorque()); 
         gState.powMessage = '💪 Engine at ' + Car.getTorque() + '% power!';
       });
     else if(powConfig.type === 'GRIP')
       pow = new Power(powConfig, Math.random() * 800, 0, () => { 
-        (powConfig.good > Math.random() ? Car.increaseGrip() : Car.decreaseGrip()); 
+        (pow.good ? Car.increaseGrip() : Car.decreaseGrip()); 
         gState.powMessage = '🥾 Tyres at ' + Car.getGrip() + '%!';
       });
     if(pow) {
