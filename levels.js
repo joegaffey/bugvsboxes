@@ -9,8 +9,8 @@ var levels = [{
     SIZES: { SMALL: 10, MEDIUM: 0, LARGE: 0 },
     POWS: [ 
       { type: 'SPEAK', probability: 8, active: 1, good: 1 },
-      { type: 'POWER', probability: 1, active: 0.5, good: 0.5},
-      { type: 'GRIP', probability: 1, active: 0.5, good: 0.5},
+      { type: 'POWER', probability: 1, active: 0.8, good: 0.6},
+      { type: 'GRIP', probability: 1, active: 0.8, good: 0.6},
     ],
     POW_MIN_RATE: 4000,
     POW_VAR_RATE: 3000,
@@ -26,8 +26,8 @@ var levels = [{
     BOXES: 15,
     SIZES: { SMALL: 9, MEDIUM: 1, LARGE: 0 },
     POWS: [ 
-      { type: 'POWER', probability: 1, active: 0.5, good: 0.5},
-      { type: 'GRIP', probability: 1, active: 0.5, good: 0.5},
+      { type: 'POWER', probability: 1, active: 0.8, good: 0.8},
+      { type: 'GRIP', probability: 1, active: 0.8, good: 0.8},
     ],
     POW_MIN_RATE: 10000,
     POW_VAR_RATE: 5000,
@@ -43,9 +43,9 @@ var levels = [{
     BOXES: 25,
     SIZES: { SMALL: 8, MEDIUM: 2, LARGE: 0 },
     POWS: [ 
-      { type: 'AWD', probability: 1, active: 0.5, good: 0.8},
-      { type: 'POWER', probability: 3, active: 0.5, good: 0.5},
-      { type: 'GRIP', probability: 3, active: 0.5, good: 0.5},
+      { type: 'AWD', probability: 1, active: 0.5, good: 0.7},
+      { type: 'POWER', probability: 3, active: 0.8, good: 0.7},
+      { type: 'GRIP', probability: 3, active: 0.8, good: 0.7},
     ],
     POW_MIN_RATE: 10000,
     POW_VAR_RATE: 5000,
@@ -60,6 +60,14 @@ var levels = [{
     MIN_RATE: 500,
     BOXES: 35,
     SIZES: { SMALL: 7, MEDIUM: 3, LARGE: 0 },
+    SIZES: { SMALL: 8, MEDIUM: 2, LARGE: 0 },
+    POWS: [ 
+      { type: 'AWD', probability: 1, active: 0.5, good: 0.7},
+      { type: 'POWER', probability: 3, active: 0.8, good: 0.7},
+      { type: 'GRIP', probability: 3, active: 0.8, good: 0.7},
+    ],
+    POW_MIN_RATE: 10000,
+    POW_VAR_RATE: 5000,
     SAY_COMPLETE:  ['Getting serious now!', 'e:😅']
   },
   { 
@@ -72,9 +80,9 @@ var levels = [{
     BOXES: 40,
     SIZES: { SMALL: 6, MEDIUM: 4, LARGE: 0 },
     POWS: [ 
-      { type: 'AWD', probability: 1, active: 0.5, good: 0.8},
-      { type: 'POWER', probability: 3, active: 0.5, good: 0.5},
-      { type: 'GRIP', probability: 3, active: 0.5, good: 0.5},
+      { type: 'AWD', probability: 1, active: 0.5, good: 0.7},
+      { type: 'POWER', probability: 3, active: 0.5, good: 0.7},
+      { type: 'GRIP', probability: 3, active: 0.5, good: 0.7},
     ],
     POW_MIN_RATE: 10000,
     POW_VAR_RATE: 5000,
@@ -90,9 +98,9 @@ var levels = [{
     BOXES: 45,
     SIZES: { SMALL: 5, MEDIUM: 5, LARGE: 0 },
     POWS: [ 
-      { type: 'AWD', probability: 1, active: 0.5, good: 0.8},
-      { type: 'POWER', probability: 3, active: 0.5, good: 0.5},
-      { type: 'GRIP', probability: 3, active: 0.5, good: 0.5},
+      { type: 'AWD', probability: 1, active: 0.5, good: 0.6},
+      { type: 'POWER', probability: 3, active: 0.5, good: 0.6},
+      { type: 'GRIP', probability: 3, active: 0.5, good: 0.6},
     ],
     POW_MIN_RATE: 10000,
     POW_VAR_RATE: 5000,
@@ -107,6 +115,13 @@ var levels = [{
     MIN_RATE: 500,
     BOXES: 45,
     SIZES: { SMALL: 4, MEDIUM: 5, LARGE: 1 },
+    POWS: [ 
+      { type: 'AWD', probability: 1, active: 0.5, good: 0.6},
+      { type: 'POWER', probability: 3, active: 0.5, good: 0.6},
+      { type: 'GRIP', probability: 3, active: 0.5, good: 0.6},
+    ],
+    POW_MIN_RATE: 10000,
+    POW_VAR_RATE: 5000,
     SAY_COMPLETE: ['That was tough!', '💪']
   },
   { 
@@ -119,7 +134,7 @@ var levels = [{
     BOXES: 45,
     SIZES: { SMALL: 3, MEDIUM: 5, LARGE: 2 },
     POWS: [ 
-      { type: 'AWD', probability: 1, active: 0.5, good: 0.8},
+      { type: 'AWD', probability: 1, active: 0.5, good: 0.5},
       { type: 'POWER', probability: 3, active: 0.5, good: 0.5},
       { type: 'GRIP', probability: 3, active: 0.5, good: 0.5},
     ],
@@ -137,9 +152,9 @@ var levels = [{
     BOXES: 45,
     SIZES: { SMALL: 2, MEDIUM: 5, LARGE: 3 },
     POWS: [ 
-      { type: 'AWD', probability: 1, active: 0.5, good: 0.8},
-      { type: 'POWER', probability: 3, active: 0.5, good: 0.5},
-      { type: 'GRIP', probability: 3, active: 0.5, good: 0.5},
+      { type: 'AWD', probability: 1, active: 0.5, good: 0.4},
+      { type: 'POWER', probability: 3, active: 0.5, good: 0.4},
+      { type: 'GRIP', probability: 3, active: 0.5, good: 0.4},
     ],
     POW_MIN_RATE: 10000,
     POW_VAR_RATE: 5000,
@@ -155,9 +170,9 @@ var levels = [{
     BOXES: 45,
     SIZES: { SMALL: 1, MEDIUM: 5, LARGE: 4 },
     POWS: [ 
-      { type: 'AWD', probability: 1, active: 0.5, good: 0.8},
-      { type: 'POWER', probability: 3, active: 0.5, good: 0.5},
-      { type: 'GRIP', probability: 3, active: 0.5, good: 0.5},
+      { type: 'AWD', probability: 1, active: 0.4, good: 0.4},
+      { type: 'POWER', probability: 3, active: 0.4, good: 0.4},
+      { type: 'GRIP', probability: 3, active: 0.4, good: 0.4},
     ],
     POW_MIN_RATE: 10000,
     POW_VAR_RATE: 5000,
@@ -172,6 +187,13 @@ var levels = [{
     MIN_RATE: 500,
     BOXES: 45,
     SIZES: { SMALL: 0, MEDIUM: 5, LARGE: 5 },
+    POWS: [ 
+      { type: 'AWD', probability: 1, active: 0.3, good: 0.3},
+      { type: 'POWER', probability: 3, active: 0.3, good: 0.3},
+      { type: 'GRIP', probability: 3, active: 0.3, good: 0.3},
+    ],
+    POW_MIN_RATE: 10000,
+    POW_VAR_RATE: 5000,
     SAY_COMPLETE:  ['Nearly there!', 'e:😎']
   },
   { 
@@ -184,9 +206,9 @@ var levels = [{
     BOXES: 45,
     SIZES: { SMALL: 10, MEDIUM: 0, LARGE: 0 },
     POWS: [ 
-      { type: 'AWD', probability: 1, active: 0.5, good: 0.8},
-      { type: 'POWER', probability: 3, active: 0.5, good: 0.5},
-      { type: 'GRIP', probability: 3, active: 0.5, good: 0.5},
+      { type: 'AWD', probability: 1, active: 0.2, good: 0.2},
+      { type: 'POWER', probability: 3, active: 0.2, good: 0.2},
+      { type: 'GRIP', probability: 3, active: 0.2, good: 0.2},
     ],
     POW_MIN_RATE: 10000,
     POW_VAR_RATE: 5000,
