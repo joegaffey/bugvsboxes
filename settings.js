@@ -17,6 +17,18 @@ const settings = {
   GRASS_SCALE: 0.193,
   GRASS_TEXTURE: assets.path + 'simplegrass.png',
   
+  END_MESSAGE: [
+    'I dreamt I was a Ladybug...',
+    'who learned to drive a car.',
+    'Skilled in clearing boxes...',
+    '...projected from afar',
+    'I thank you for your company.',
+    'Our labor now is done.',
+    'Remember me and try to live...',
+    '...in happiness and fun.',
+    null
+  ],
+  
   // Screen settings
   SCREEN_RATIO: 1.333,
   
@@ -66,6 +78,9 @@ const settings = {
   DROP_Y: 0,
 
   // Power up/down settings
+  
+  EXPLODE_FORCE: -0.04,
+  
   POW_OPTIONS: { 
     label: 'pow',
     friction: 0.001,
@@ -83,7 +98,7 @@ const settings = {
     { type: 'POWER', icon: '💪', actMessage: '💪 Powerrr! 💪'},
     { type: 'AWD', icon: '🚙', actMessage: '🚙 4X4 🚙'},
     { type: 'GRIP', icon: '🥾', actMessage: '🥾 Get a grip!'},
-    // { type: 'EXPLODE', icon: '💥', readyMessage: 'Tick...tick...tick...', actMessage: '💥💥💥 Boom! 💥💥💥'},
+    { type: 'EXPLODE', icon: '💥', readyMessage: 'Tick...tick...tick...', actMessage: '💥💥💥 Boom! 💥💥💥'},
     // { type: 'SPEEDUP', icon: '⚡', actMessage: 'I am speed! ⚡'},
     // { type: 'SLEEP', icon: '💤', actMessage: '💤 Sleepy time...'},
     // { type: 'CAR', icon: '🚖', actMessage: '1UP 🚖'},

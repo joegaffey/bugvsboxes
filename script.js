@@ -222,7 +222,15 @@ Events.on(engine, 'collisionStart', (e) => {
           pair.bodyA.power.hit();
         else
           pair.bodyB.power.hit();
+    }
+    else if(pair.bodyA.label === 'pow' || pair.bodyB.label === 'pow') {
+      let body = pair.bodyA;
+      if(pair.bodyA.label !== 'pow')
+        body = pair.bodyB;
+      if(body.power.options.type === 'EXPLODE' && body.power.active) {
+        body.power.hit();
       }
+    }
   });
 });
 
@@ -287,9 +295,28 @@ function startLevel(num) {
 
 function endGame(code) {
   audio.engine.stop();
-  gui.showEndScreen(code, () => restart());
   runner.enabled = false;
-  gState.running = false;
+  // if(code === 0) {
+  //   gState.running = true;
+  //   endMessage();
+  //   setTimeout(() => { 
+  //     gui.showEndScreen(code, () => restart());
+  //     gState.running = false;
+  //   }, 32000);
+  // }
+  // else {
+    gui.showEndScreen(code, () => restart());
+    gState.running = false;
+  // }
+}
+
+function endMessage() {
+  settings.END_MESSAGE.forEach((message, i) => {
+    setTimeout(() => {
+      hud.speakMessage = message;
+      audio.say(message);
+    }, i * 4000);
+  });
 }
 
 function endLevel() {
@@ -405,6 +432,10 @@ function addPower(powConfig) {
         (pow.good ? Car.increaseGrip() : Car.decreaseGrip()); 
         gState.powMessage = '🥾 Tyres at ' + Car.getGrip() + '%!';
       });
+    else if(powConfig.type === 'EXPLODE')
+      pow = new Power(powConfig, Math.random() * 800, 0, () => { 
+        explode(pow);
+      });
     if(pow) {
       Composite.add(engine.world, [pow.body]);
       gState.powers.push(pow);
@@ -430,6 +461,22 @@ function updatePowers() {
     }
   });
 }
+
+function explode(pow) {
+  audio.play('explode');
+  const bodies = Composite.allBodies(engine.world);
+  for (var i = 0; i < bodies.length; i++) {
+    const body = bodies[i];
+    var targetAngle = Matter.Vector.angle(body.position, pow.body.position);
+    if (!body.isStatic && pow.body !== body) {
+      var force = settings.EXPLODE_FORCE * body.mass;
+      var deltaVector = Matter.Vector.sub(pow.body.position, body.position);
+      var normalizedDelta = Matter.Vector.normalise(deltaVector);
+      var forceVector = Matter.Vector.mult(normalizedDelta, force);
+      Body.applyForce(body, body.position, forceVector);
+    }
+  }
+};
 
 
 ///////////////////////// Car controls ////////////////////////////
