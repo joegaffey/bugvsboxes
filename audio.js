@@ -45,11 +45,12 @@ function adsr(T, a, d, s, r, sustain) {
   return gain;
 }
 
-function tweet(freq, offset) {
+function tweet(freq, offset, gain) {
   if(audio.context) {
     var T = audio.context.currentTime;
-    const tweak = 0.1; // Added by JG
-    var gain = adsr(T + offset + 0.03  * tweak, 0.01  * tweak, 0.08 * tweak, 0, 0, 0);
+    const tweak = 0.1;
+    if(!gain)
+      gain = adsr(T + offset + 0.03  * tweak, 0.01  * tweak, 0.08 * tweak, 0, 0, 0);
     var osc = audio.context.createOscillator();
     osc.frequency.value = freq;
     osc.frequency.setValueAtTime(freq, T + offset);
@@ -72,13 +73,13 @@ audio.init = function() {
 
 audio.say = function(message) {
   const alphabet = 'abcdefghijklmnopqrstuvwxyz';
-  let val = 1000;
   Array.from(message.toLowerCase()).forEach((c, i) => {
     if(c === ' ')
-      val = 100;
-    else
-      val = alphabet.indexOf(c) / 26;
-    tweet(frequency * (1 + 2 * val), i * offset);
+      tweet(1, 1, 0);
+    else {
+      const val = alphabet.indexOf(c) / 26;
+      tweet(frequency * (1 + 2 * val), i * offset);
+    }
   });
 }
 
