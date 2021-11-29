@@ -19,12 +19,11 @@ Hide recorded gameplay video: Shift + X
 ✅  Touch controls  
 ✅  Ladybug to English  
 ✅  In-game video capture  
+✅  Power ups  
 ⏳  Installable PWA  
 ⏳  Gamepad controls  
 ⏳  Haptics  
 ⏳  i18n  
-⏳  Power ups  
-
 
 ## Credits
 

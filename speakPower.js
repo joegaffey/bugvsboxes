@@ -14,7 +14,7 @@ export default class SpeakPower extends Power {
     audio.say(hud.speakMessage);
     SpeakPower.currentMessageIndex++;
     if(SpeakPower.currentMessageIndex >= SpeakPower.messages.length)
-      SpeakPower.currentMessageIndex = 6;
+      SpeakPower.currentMessageIndex = 5;
     if(SpeakPower.timeOut)
       clearTimeout(SpeakPower.timeOut);
     SpeakPower.timeOut = setTimeout(() => { hud.speakMessage = null; }, 4000)
@@ -23,17 +23,19 @@ export default class SpeakPower extends Power {
 
 SpeakPower.currentMessageIndex = 0;
 SpeakPower.messages = [
-  'Bubbles can be good or bad',
   'Green bubbles are good',
   'Red bubbles are bad',
   'Some bubbles have to be hit twice..',
   '...those could be  good or bad!',
   'Good luck!',
   'Nice day for a drive...',
-  '...apart from these boxes.',
+  '...apart from these boxes!',
   'At least it\'s sunny.',
   'It\'s a bugs life for me.',
   'Sometimes you have to take a run.',
   'An upgrade would be nice.',
-  'This reminds me of Budapest!',
+  'This reminds me of Budapest.',
+  'Tony Stark built this car...',
+  '...in a cave...',
+  '...with a box of W3C specs!'
 ];

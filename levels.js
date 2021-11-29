@@ -5,15 +5,15 @@ var levels = [{
     WARN_BOXES: 6,
     VAR_RATE: 5000,
     MIN_RATE: 1000,
-    BOXES: 10,
+    BOXES: 15,
     SIZES: { SMALL: 10, MEDIUM: 0, LARGE: 0 },
     POWS: [ 
-      { type: 'SPEAK', probability: 8, active: 1, good: 1 },
-      { type: 'POWER', probability: 1, active: 0.8, good: 0.6},
-      { type: 'GRIP', probability: 1, active: 0.8, good: 0.6},
+      { type: 'SPEAK', probability: 10, active: 1, good: 1 },
+      { type: 'POWER', probability: 1, active: 0.8, good: 0.7},
+      { type: 'GRIP', probability: 1, active: 0.8, good: 0.7},
     ],
-    POW_MIN_RATE: 4000,
-    POW_VAR_RATE: 3000,
+    POW_MIN_RATE: 3000,
+    POW_VAR_RATE: 2000,
     SAY_COMPLETE: ['Well done!', 'e:😁']
   },
   { 
@@ -23,14 +23,15 @@ var levels = [{
     WARN_BOXES: 6,
     VAR_RATE: 4000,
     MIN_RATE: 800,
-    BOXES: 15,
+    BOXES: 20,
     SIZES: { SMALL: 9, MEDIUM: 1, LARGE: 0 },
     POWS: [ 
-      { type: 'POWER', probability: 1, active: 0.8, good: 0.8},
-      { type: 'GRIP', probability: 1, active: 0.8, good: 0.8},
+      { type: 'POWER', probability: 2, active: 0.8, good: 0.8},
+      { type: 'GRIP', probability: 2, active: 0.8, good: 0.8},
+      { type: 'EXPLODE', probability: 1, active: 0, good: 0 },
     ],
-    POW_MIN_RATE: 10000,
-    POW_VAR_RATE: 5000,
+    POW_MIN_RATE: 6000,
+    POW_VAR_RATE: 4000,
     SAY_COMPLETE: ['Great job!', 'e:🥳']
   },
   {
@@ -46,9 +47,10 @@ var levels = [{
       { type: 'AWD', probability: 1, active: 0.5, good: 0.7},
       { type: 'POWER', probability: 3, active: 0.8, good: 0.7},
       { type: 'GRIP', probability: 3, active: 0.8, good: 0.7},
+      { type: 'EXPLODE', probability: 2, active: 0, good: 0 },
     ],
-    POW_MIN_RATE: 10000,
-    POW_VAR_RATE: 5000,
+    POW_MIN_RATE: 6000,
+    POW_VAR_RATE: 4000,
     SAY_COMPLETE: ['Wohoo!!!', 'e:💯']
   },
   { 
@@ -65,9 +67,10 @@ var levels = [{
       { type: 'AWD', probability: 1, active: 0.5, good: 0.7},
       { type: 'POWER', probability: 3, active: 0.8, good: 0.7},
       { type: 'GRIP', probability: 3, active: 0.8, good: 0.7},
+      { type: 'EXPLODE', probability: 3, active: 0.2, good: 0 },
     ],
-    POW_MIN_RATE: 10000,
-    POW_VAR_RATE: 5000,
+    POW_MIN_RATE: 6000,
+    POW_VAR_RATE: 4000,
     SAY_COMPLETE:  ['Getting serious now!', 'e:😅']
   },
   { 
@@ -83,9 +86,10 @@ var levels = [{
       { type: 'AWD', probability: 1, active: 0.5, good: 0.7},
       { type: 'POWER', probability: 3, active: 0.5, good: 0.7},
       { type: 'GRIP', probability: 3, active: 0.5, good: 0.7},
+      { type: 'EXPLODE', probability: 3, active: 0.3, good: 0 },
     ],
-    POW_MIN_RATE: 10000,
-    POW_VAR_RATE: 5000,
+    POW_MIN_RATE: 6000,
+    POW_VAR_RATE: 4000,
     SAY_COMPLETE: ['Noice!', 'e:🧐']
   },
   { 
@@ -101,9 +105,10 @@ var levels = [{
       { type: 'AWD', probability: 1, active: 0.5, good: 0.6},
       { type: 'POWER', probability: 3, active: 0.5, good: 0.6},
       { type: 'GRIP', probability: 3, active: 0.5, good: 0.6},
+      { type: 'EXPLODE', probability: 4, active: 0.4, good: 0 },
     ],
-    POW_MIN_RATE: 10000,
-    POW_VAR_RATE: 5000,
+    POW_MIN_RATE: 6000,
+    POW_VAR_RATE: 4000,
     SAY_COMPLETE: ['Phew!', 'e:😵‍💫']
   },
   { 
@@ -119,9 +124,10 @@ var levels = [{
       { type: 'AWD', probability: 1, active: 0.5, good: 0.6},
       { type: 'POWER', probability: 3, active: 0.5, good: 0.6},
       { type: 'GRIP', probability: 3, active: 0.5, good: 0.6},
+      { type: 'EXPLODE', probability: 4, active: 0.5, good: 0 },
     ],
-    POW_MIN_RATE: 10000,
-    POW_VAR_RATE: 5000,
+    POW_MIN_RATE: 6000,
+    POW_VAR_RATE: 4000,
     SAY_COMPLETE: ['That was tough!', '💪']
   },
   { 
@@ -136,10 +142,10 @@ var levels = [{
     POWS: [ 
       { type: 'AWD', probability: 1, active: 0.5, good: 0.5},
       { type: 'POWER', probability: 3, active: 0.5, good: 0.5},
-      { type: 'GRIP', probability: 3, active: 0.5, good: 0.5},
+      { type: 'GRIP', probability: 5, active: 0.6, good: 0.5},
     ],
-    POW_MIN_RATE: 10000,
-    POW_VAR_RATE: 5000,
+    POW_MIN_RATE: 6000,
+    POW_VAR_RATE: 4000,
     SAY_COMPLETE: ['Wow, you are good!', 'e:😇']
   },
   { 
@@ -155,9 +161,10 @@ var levels = [{
       { type: 'AWD', probability: 1, active: 0.5, good: 0.4},
       { type: 'POWER', probability: 3, active: 0.5, good: 0.4},
       { type: 'GRIP', probability: 3, active: 0.5, good: 0.4},
+      { type: 'EXPLODE', probability: 5, active: 0.7, good: 0 },
     ],
-    POW_MIN_RATE: 10000,
-    POW_VAR_RATE: 5000,
+    POW_MIN_RATE: 6000,
+    POW_VAR_RATE: 4000,
     SAY_COMPLETE: ['Not sure how much', 'more I can take!', 'e:😟']
   },
   { 
@@ -173,9 +180,10 @@ var levels = [{
       { type: 'AWD', probability: 1, active: 0.4, good: 0.4},
       { type: 'POWER', probability: 3, active: 0.4, good: 0.4},
       { type: 'GRIP', probability: 3, active: 0.4, good: 0.4},
+      { type: 'EXPLODE', probability: 5, active: 0.7, good: 0 },
     ],
-    POW_MIN_RATE: 10000,
-    POW_VAR_RATE: 5000,
+    POW_MIN_RATE: 6000,
+    POW_VAR_RATE: 4000,
     SAY_COMPLETE:  ['Let\'s go!!!', 'e:💥']
   },
   { 
@@ -191,9 +199,10 @@ var levels = [{
       { type: 'AWD', probability: 1, active: 0.3, good: 0.3},
       { type: 'POWER', probability: 3, active: 0.3, good: 0.3},
       { type: 'GRIP', probability: 3, active: 0.3, good: 0.3},
+      { type: 'EXPLODE', probability: 6, active: 0.8, good: 0 },
     ],
-    POW_MIN_RATE: 10000,
-    POW_VAR_RATE: 5000,
+    POW_MIN_RATE: 6000,
+    POW_VAR_RATE: 4000,
     SAY_COMPLETE:  ['Nearly there!', 'e:😎']
   },
   { 
@@ -204,14 +213,15 @@ var levels = [{
     VAR_RATE: 1000,
     MIN_RATE: 300,
     BOXES: 45,
-    SIZES: { SMALL: 10, MEDIUM: 0, LARGE: 0 },
+    SIZES: { SMALL: 0, MEDIUM: 4, LARGE: 6 },
     POWS: [ 
       { type: 'AWD', probability: 1, active: 0.2, good: 0.2},
       { type: 'POWER', probability: 3, active: 0.2, good: 0.2},
       { type: 'GRIP', probability: 3, active: 0.2, good: 0.2},
+      { type: 'EXPLODE', probability: 6, active: 1, good: 0 },
     ],
-    POW_MIN_RATE: 10000,
-    POW_VAR_RATE: 5000,
+    POW_MIN_RATE: 6000,
+    POW_VAR_RATE: 4000,
     SAY_COMPLETE:  ['Thank You!', 'e:❤ ❤ ❤ ❤ ❤']
   }  
 ];
