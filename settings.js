@@ -84,8 +84,9 @@ const settings = {
   POW_OPTIONS: { 
     label: 'pow',
     friction: 0.001,
-    density: 0.0001,
-    restitution: 0.8,
+    frictionAir: 0.015,
+    density: 0.00005,
+    restitution: 1,
     render: {
       strokeStyle: 'red',
       lineWidth: 3,
