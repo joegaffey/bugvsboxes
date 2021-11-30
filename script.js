@@ -22,7 +22,10 @@ const Engine = Matter.Engine,
   Composite = Matter.Composite,
   Composites = Matter.Composites,
   Vector = Matter.Vector,
-  Events = Matter.Events;
+  Events = Matter.Events,
+  Mouse = Matter.Mouse,
+  MouseConstraint = Matter.MouseConstraint;
+
 
 const containerEl = document.querySelector('#matter');
 const videoEl = document.querySelector('#video');
@@ -60,6 +63,7 @@ const gState = {
   platformLoad: 0,
   isAccel: false,
   isBrake: false,
+  isBeep: false,
   boxes: [],
   powers: [],
   level: levels[0],
@@ -142,20 +146,45 @@ function getLevelPow() {
 
 /////////////////////  Controls setup  ////////////////////////////////////
 
+function getScaledPos(canvas, evt) {
+  const rect = canvas.getBoundingClientRect(), // abs. size of element
+      scaleX = canvas.width / rect.width,    // relationship bitmap vs. element for X
+      scaleY = canvas.height / rect.height;  // relationship bitmap vs. element for Y
+
+  return {
+    x: (evt.clientX - rect.left) * scaleX,   // scale mouse coordinates after they have
+    y: (evt.clientY - rect.top) * scaleY     // been adjusted to be relative to element
+  }
+}
+
 containerEl.addEventListener('pointerdown', (e) => { 
   if(!audio.context)
     audio.init();
-  if(gState.running)
-    move(e.clientX); 
+  if(gState.running) {
+    const pos = getScaledPos(ctx.canvas, e)
+    if(Matter.Bounds.contains(car.bodies[0].bounds, pos))
+      gState.isBeep = true;
+    else {
+      gState.isBeep = false;
+      move(e.clientX);
+    }
+  }
   else 
     gui.checkPointer(e);
 }, false);
-containerEl.addEventListener('pointerup', (e) => { stop() }, false);
+containerEl.addEventListener('pointerup', (e) => { stop(); }, false);
 containerEl.addEventListener('pointercancel', (e) => { stop() }, false);
 containerEl.addEventListener('pointerleave', (e) => { stop() }, false);
 containerEl.addEventListener('pointermove', (e) => {
-  if(e.pointerType === 'touch')
-    move(e.clientX);
+  if(e.pointerType === 'touch') {
+    const pos = getScaledPos(ctx.canvas, e)
+    if(Matter.Bounds.contains(car.bodies[0].bounds, pos))
+      gState.isBeep = true;
+    else {
+      gState.isBeep = false;
+      move(e.clientX);
+    }
+  }
   else if(e.pointerType === 'mouse' && e.buttons > 0) {
     move(e.clientX);
   }
@@ -192,8 +221,10 @@ document.body.addEventListener('keyup', (e) => {
 Events.on(runner, 'beforeTick', (event) => {
   if(!gState.running)
     return;
-  if (keys[90] || keys[37] || gState.isAccel) { car.accel(); };
-  if (keys[88] || keys[39] || gState.isBrake) { car.brake(); };
+    
+  if(keys[87] || keys[38] || gState.isBeep) { beep(); };
+  if(keys[65] || keys[37] || gState.isAccel) { car.accel(); };
+  if(keys[68] || keys[39] || gState.isBrake) { car.brake(); };
   updateBoxes();
   updateCar();
   updatePowers();
@@ -467,7 +498,7 @@ function explode(pow) {
   const bodies = Composite.allBodies(engine.world);
   for (var i = 0; i < bodies.length; i++) {
     const body = bodies[i];
-    var targetAngle = Matter.Vector.angle(body.position, pow.body.position);
+    // var targetAngle = Matter.Vector.angle(body.position, pow.body.position);
     if (!body.isStatic && pow.body !== body) {
       var force = settings.EXPLODE_FORCE * body.mass;
       var deltaVector = Matter.Vector.sub(pow.body.position, body.position);
@@ -476,7 +507,24 @@ function explode(pow) {
       Body.applyForce(body, body.position, forceVector);
     }
   }
-};
+}
+
+function beep() {
+  audio.play('beep');
+  const origin = car.bodies[0].position;
+  const bodies = Composite.allBodies(engine.world);
+  for (var i = 0; i < bodies.length; i++) {
+    const body = bodies[i];
+    // var targetAngle = Matter.Vector.angle(body.position, origin);
+    if (!body.isStatic && body.label === 'pow') {
+      var force = -0.0003;
+      var deltaVector = Matter.Vector.sub(origin, body.position);
+      var normalizedDelta = Matter.Vector.normalise(deltaVector);
+      var forceVector = Matter.Vector.mult(normalizedDelta, force);
+      Body.applyForce(body, body.position, forceVector);
+    }
+  }
+}
 
 
 ///////////////////////// Car controls ////////////////////////////

@@ -27,7 +27,7 @@ export default class Power {
       this.deathCount = 10;
     } 
     else {
-      audio.play('beep');
+      audio.play('pop');
       this.good ? this.ringColor = 'green' : this.ringColor = 'red';
       this.body.render.sprite.texture = this.getTexture(
         this.options.icon,

@@ -8,7 +8,7 @@ audio.sounds = { fall: { audio: new Audio(assets.path + 'fall.wav'), volume: 0.3
                  pop: { audio: new Audio(assets.path + 'pop.wav'), volume: 1 }, //f=1500,b=0,r=0.5,s=40,S=20,g=0.6,l=0.2,L=0.5
                  score: { audio: new Audio(assets.path + 'pickup.wav'), volume: 0.2 }, //Noise 3 (I think)
                  button: { audio: new Audio(assets.path + 'button.wav'), volume: 0.2 }, //W=8000,f=500,v=6.793,V=559.783,_=-0.9,a=3,A=3,b=3,r=3,c=-4500,C=0,l=0.2,L=0.25
-                 beep: { audio: new Audio(assets.path + 'button.wav'), volume: 0.3 }, //W=8000,f=500,v=6.793,V=559.783,_=-0.9,a=3,A=3,b=3,r=3,c=-4500,C=0,l=0.2,L=0.25
+                 beep: { audio: new Audio(assets.path + 'beep.wav'), volume: 0.15 }, //n=B,w=Sawtooth,W=22050,V=0,t=95.109,T=0.5,_=-0.567,b=1,l=0.4,L=0.14,M=s
                  explode: { audio: new Audio(assets.path + 'explode.wav'), volume: 0.2 }}; //Explosion 2
 
 audio.play = function(sound) {
