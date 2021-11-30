@@ -6,7 +6,7 @@ GitHub [GameOff](https://itch.io/jam/game-off-2021) 2021 entry.
 Play [here](https://joegaffey.github.io/bugvsboxes/) or [here](https://joegaffey.itch.io/bugvsboxes)!
 
 ## Controls
-Mouse, touch or keyboard (arrow keys or z & x).
+Mouse, touch or keyboard (arrow keys or WASD).
 
 Record/Stop recording gameplay: Shift + R  
 Hide recorded gameplay video: Shift + X

@@ -45,13 +45,14 @@ gui.drawFrame = function() {
   gui.ctx.shadowColor = '#333'
   gui.ctx.shadowOffsetX = 2;
   gui.ctx.shadowOffsetY = 2;
-  gui.ctx.fillStyle = 'lightgray'
-  gui.ctx.fillRect(100, 150, 600, 300);
+  // gui.ctx.fillStyle = 'lightgray'
+  // gui.ctx.fillRect(100, 150, 600, 300);
+  roundRect(gui.ctx, 100, 150, 600, 300, 60, '#ddd', { width: 5, color: 'darkgrey'});
 }
 
 gui.drawText = function() {
   gui.ctx.font = 'bold 30px Verdana';
-  gui.ctx.fillStyle = '#888';
+  gui.ctx.fillStyle = '#999';
   gui.ctx.textAlign = 'center';
   const offset = 275 - gui.data.message.length * 25;  
   gui.data.message.forEach((line, i, arr) => {
@@ -67,9 +68,10 @@ gui.drawText = function() {
 }
 
 gui.drawButton = function(){
-  gui.ctx.fillStyle = 'darkgrey';
   const d = getButtonRect(gui.data.button.label);
-  gui.ctx.fillRect(d.x, d.y, d.width, d.height);
+  // gui.ctx.fillStyle = 'darkgrey';
+  // gui.ctx.fillRect(d.x, d.y, d.width, d.height);
+  roundRect(gui.ctx, d.x, d.y, d.width, d.height, 20, '#28a745', null);//{ width: 5, color: 'lightgrey'}); #007bff
   gui.ctx.fillStyle = 'lightgray';
   gui.ctx.fillText(gui.data.button.label, 400, 400);
 }
@@ -159,6 +161,63 @@ function isInside(box, point, e) {
     return true;
   else 
     return false;
+}
+
+
+//https://stackoverflow.com/questions/1255512/how-to-draw-a-rounded-rectangle-using-html-canvas
+/**
+ * Draws a rounded rectangle using the current state of the canvas.
+ * If you omit the last three params, it will draw a rectangle
+ * outline with a 5 pixel border radius
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {Number} x The top left x coordinate
+ * @param {Number} y The top left y coordinate
+ * @param {Number} width The width of the rectangle
+ * @param {Number} height The height of the rectangle
+ * @param {Number} [radius = 5] The corner radius; It can also be an object 
+ *                 to specify different radii for corners
+ * @param {Number} [radius.tl = 0] Top left
+ * @param {Number} [radius.tr = 0] Top right
+ * @param {Number} [radius.br = 0] Bottom right
+ * @param {Number} [radius.bl = 0] Bottom left
+ * @param {Boolean} [fill = false] Whether to fill the rectangle.
+ * @param {Boolean} [stroke = true] Whether to stroke the rectangle.
+ */
+ function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+  if (typeof stroke === 'undefined') {
+    stroke = true;
+  }
+  if (typeof radius === 'undefined') {
+    radius = 5;
+  }
+  if (typeof radius === 'number') {
+    radius = {tl: radius, tr: radius, br: radius, bl: radius};
+  } else {
+    var defaultRadius = {tl: 0, tr: 0, br: 0, bl: 0};
+    for (var side in defaultRadius) {
+      radius[side] = radius[side] || defaultRadius[side];
+    }
+  }
+  ctx.beginPath();
+  ctx.moveTo(x + radius.tl, y);
+  ctx.lineTo(x + width - radius.tr, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
+  ctx.lineTo(x + width, y + height - radius.br);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
+  ctx.lineTo(x + radius.bl, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
+  ctx.lineTo(x, y + radius.tl);
+  ctx.quadraticCurveTo(x, y, x + radius.tl, y);
+  ctx.closePath();
+  if (fill) {
+    ctx.fillStyle = fill; // JG addition
+    ctx.fill();
+  }
+  if (stroke) {
+    ctx.strokeStyle = stroke.color; // JG addition
+    ctx.lineWidth = stroke.width; // JG addition
+    ctx.stroke();
+  }
 }
 
 gui.showMessage = function(message, nextAction) {
