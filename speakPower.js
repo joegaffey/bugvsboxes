@@ -25,7 +25,7 @@ SpeakPower.currentMessageIndex = 0;
 SpeakPower.messages = [
   'Green bubbles are good',
   'Red bubbles are bad',
-  'White bubbles you have to hit twice..',
+  'White bubbles must be hit twice..',
   '...could be good or bad!',
   'Beep your troubles away',
   'Good luck!',
@@ -34,7 +34,6 @@ SpeakPower.messages = [
   'At least it\'s sunny',
   'It\'s a Bugs Life for me',
   'This reminds me of Budapest',
-  'An upgrade would be nice',
   'Tony Stark built this car...',
   '...in a cave...',
   '...with a box of W3C specs!'

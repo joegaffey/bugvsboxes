@@ -45,8 +45,6 @@ gui.drawFrame = function() {
   gui.ctx.shadowColor = '#333'
   gui.ctx.shadowOffsetX = 2;
   gui.ctx.shadowOffsetY = 2;
-  // gui.ctx.fillStyle = 'lightgray'
-  // gui.ctx.fillRect(100, 150, 600, 300);
   roundRect(gui.ctx, 100, 150, 600, 300, 60, '#ddd', { width: 5, color: 'darkgrey'});
 }
 
@@ -69,8 +67,6 @@ gui.drawText = function() {
 
 gui.drawButton = function(){
   const d = getButtonRect(gui.data.button.label);
-  // gui.ctx.fillStyle = 'darkgrey';
-  // gui.ctx.fillRect(d.x, d.y, d.width, d.height);
   roundRect(gui.ctx, d.x, d.y, d.width, d.height, 20, '#28a745', null);//{ width: 5, color: 'lightgrey'}); #007bff
   gui.ctx.fillStyle = 'lightgray';
   gui.ctx.fillText(gui.data.button.label, 400, 400);
