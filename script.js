@@ -157,37 +157,36 @@ function getScaledPos(canvas, evt) {
   }
 }
 
+function checkBeep(e) {
+  const pos = getScaledPos(ctx.canvas, e);
+  if(car && Matter.Bounds.contains(car.bodies[0].bounds, pos))
+    gState.isBeep = true;
+  else {
+    gState.isBeep = false;
+  }
+  console.log(gState.isBeep)
+}
+
 containerEl.addEventListener('pointerdown', (e) => { 
   if(!audio.context)
     audio.init();
   if(gState.running) {
-    const pos = getScaledPos(ctx.canvas, e)
-    if(Matter.Bounds.contains(car.bodies[0].bounds, pos))
-      gState.isBeep = true;
-    else {
-      gState.isBeep = false;
-      move(e.clientX);
-    }
+    checkBeep(e);
+    move(e.clientX);
   }
   else 
     gui.checkPointer(e);
 }, false);
-containerEl.addEventListener('pointerup', (e) => { stop(); }, false);
-containerEl.addEventListener('pointercancel', (e) => { stop() }, false);
-containerEl.addEventListener('pointerleave', (e) => { stop() }, false);
+containerEl.addEventListener('pointerup', (e) => { gState.isBeep = false; stop(); }, false);
+containerEl.addEventListener('pointercancel', (e) => { gState.isBeep = false; stop() }, false);
+containerEl.addEventListener('pointerleave', (e) => { gState.isBeep = false; stop() }, false);
 containerEl.addEventListener('pointermove', (e) => {
   if(e.pointerType === 'touch') {
-    const pos = getScaledPos(ctx.canvas, e)
-    if(Matter.Bounds.contains(car.bodies[0].bounds, pos))
-      gState.isBeep = true;
-    else {
-      gState.isBeep = false;
-      move(e.clientX);
-    }
-  }
-  else if(e.pointerType === 'mouse' && e.buttons > 0) {
+    checkBeep(e);
     move(e.clientX);
   }
+  else if(e.pointerType === 'mouse' && e.buttons > 0)   
+    move(e.clientX);
 }, false);
 
 const keys = [];
@@ -498,7 +497,6 @@ function explode(pow) {
   const bodies = Composite.allBodies(engine.world);
   for (var i = 0; i < bodies.length; i++) {
     const body = bodies[i];
-    // var targetAngle = Matter.Vector.angle(body.position, pow.body.position);
     if (!body.isStatic && pow.body !== body) {
       var force = settings.EXPLODE_FORCE * body.mass;
       var deltaVector = Matter.Vector.sub(pow.body.position, body.position);
@@ -515,7 +513,6 @@ function beep() {
   const bodies = Composite.allBodies(engine.world);
   for (var i = 0; i < bodies.length; i++) {
     const body = bodies[i];
-    // var targetAngle = Matter.Vector.angle(body.position, origin);
     if (!body.isStatic && body.label === 'pow') {
       var force = -0.0003;
       var deltaVector = Matter.Vector.sub(origin, body.position);
