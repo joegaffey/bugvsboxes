@@ -44,6 +44,7 @@ const Car = function(xx, yy, width, height, wheelSize) {
     { "x":145, "y":102 }, { "x":154, "y":105 }, { "x":201, "y":105 }, { "x":201, "y":103 } 
   ];
   
+  // const bodyVertices = [{"x":109,"y":36},{"x":75,"y":36},{"x":46,"y":47},{"x":21,"y":68},{"x":18,"y":79},{"x":4,"y":77},{"x":4,"y":89},{"x":19,"y":92},{"x":171,"y":101},{"x":300,"y":94},{"x":315,"y":90},{"x":313,"y":72},{"x":295,"y":66},{"x":271,"y":37},{"x":242,"y":16},{"x":212,"y":4},{"x":173,"y":2},{"x":122,"y":12}]
   const bodyOptions = settings.CAR_BODY_OPTIONS;
   bodyOptions.collisionFilter = { group: group };
 
@@ -127,7 +128,6 @@ const Car = function(xx, yy, width, height, wheelSize) {
   Composite.addBody(car, wheelB);
   Composite.addConstraint(car, axelA);
   Composite.addConstraint(car, axelB);
-
   return car;
 };
 

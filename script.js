@@ -13,6 +13,23 @@ import Recorder from './recorder.js';
 import Power from './power.js';
 import SpeakPower from './speakPower.js';
 
+
+//https://blog.bullgare.com/2019/03/simple-way-to-detect-browsers-fps-via-js/
+let fps;
+let times = [];
+function fpsLoop() {
+  window.requestAnimationFrame(() => {
+    const now = performance.now();
+    while (times.length > 0 && times[0] <= now - 1000) {
+      times.shift();
+    }
+    times.push(now);
+    fps = times.length;
+    fpsLoop();
+  });
+}
+fpsLoop();
+
 // module aliases
 const Engine = Matter.Engine,
   Render = Matter.Render,
@@ -26,13 +43,20 @@ const Engine = Matter.Engine,
   Mouse = Matter.Mouse,
   MouseConstraint = Matter.MouseConstraint;
 
-
 const containerEl = document.querySelector('#matter');
 const videoEl = document.querySelector('#video');
 
 // create an engine
 const engine = Engine.create();
-engine.timing.isFixed = true;
+engine.timing.isFixed = false;
+
+// Calculate and set physics rate
+setInterval(() => {
+  if(fps > 75) // Why 75? Seems to work best
+    engine.timing.timeScale = Math.round(75 / fps * 100) / 100;
+  else 
+    engine.timing.timeScale = 1;
+}, 1000);
 
 const render = Render.create({
   element: containerEl,
