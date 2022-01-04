@@ -1,7 +1,3 @@
-// Script embedded from Skypack CDN - uncomment below if you want to delete from project and have external dependency instead
-// import { default as Matter } from 'https://cdn.skypack.dev/matter-js';
-// export default Matter;
-
 var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
 function getDefaultExportFromCjs(x) {
   return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
@@ -20,7 +16,7 @@ function commonjsRequire() {
 }
 var matter = createCommonjsModule(function(module, exports) {
   /*!
-   * matter-js 0.17.1 by @liabru
+   * matter-js 0.18.0 by @liabru
    * http://brm.io/matter-js/
    * License MIT
    * 
@@ -107,7 +103,7 @@ var matter = createCommonjsModule(function(module, exports) {
         return Object.prototype.hasOwnProperty.call(object, property);
       };
       __webpack_require__.p = "";
-      return __webpack_require__(__webpack_require__.s = 22);
+      return __webpack_require__(__webpack_require__.s = 21);
     }([
       function(module2, exports2) {
         var Common = {};
@@ -595,37 +591,35 @@ var matter = createCommonjsModule(function(module, exports) {
             return mass / 6 * (numerator / denominator);
           };
           Vertices.translate = function(vertices, vector, scalar) {
-            var i;
-            if (scalar) {
-              for (i = 0; i < vertices.length; i++) {
-                vertices[i].x += vector.x * scalar;
-                vertices[i].y += vector.y * scalar;
-              }
-            } else {
-              for (i = 0; i < vertices.length; i++) {
-                vertices[i].x += vector.x;
-                vertices[i].y += vector.y;
-              }
+            scalar = typeof scalar !== "undefined" ? scalar : 1;
+            var verticesLength = vertices.length, translateX = vector.x * scalar, translateY = vector.y * scalar, i;
+            for (i = 0; i < verticesLength; i++) {
+              vertices[i].x += translateX;
+              vertices[i].y += translateY;
             }
             return vertices;
           };
           Vertices.rotate = function(vertices, angle, point) {
             if (angle === 0)
               return;
-            var cos = Math.cos(angle), sin = Math.sin(angle);
-            for (var i = 0; i < vertices.length; i++) {
-              var vertice = vertices[i], dx = vertice.x - point.x, dy = vertice.y - point.y;
-              vertice.x = point.x + (dx * cos - dy * sin);
-              vertice.y = point.y + (dx * sin + dy * cos);
+            var cos = Math.cos(angle), sin = Math.sin(angle), pointX = point.x, pointY = point.y, verticesLength = vertices.length, vertex, dx, dy, i;
+            for (i = 0; i < verticesLength; i++) {
+              vertex = vertices[i];
+              dx = vertex.x - pointX;
+              dy = vertex.y - pointY;
+              vertex.x = pointX + (dx * cos - dy * sin);
+              vertex.y = pointY + (dx * sin + dy * cos);
             }
             return vertices;
           };
           Vertices.contains = function(vertices, point) {
-            for (var i = 0; i < vertices.length; i++) {
-              var vertice = vertices[i], nextVertice = vertices[(i + 1) % vertices.length];
-              if ((point.x - vertice.x) * (nextVertice.y - vertice.y) + (point.y - vertice.y) * (vertice.x - nextVertice.x) > 0) {
+            var pointX = point.x, pointY = point.y, verticesLength = vertices.length, vertex = vertices[verticesLength - 1], nextVertex;
+            for (var i = 0; i < verticesLength; i++) {
+              nextVertex = vertices[i];
+              if ((pointX - vertex.x) * (nextVertex.y - vertex.y) + (pointY - vertex.y) * (vertex.x - nextVertex.x) > 0) {
                 return false;
               }
+              vertex = nextVertex;
             }
             return true;
           };
@@ -816,11 +810,21 @@ var matter = createCommonjsModule(function(module, exports) {
               constraints: [],
               composites: [],
               label: "Composite",
-              plugin: {}
+              plugin: {},
+              cache: {
+                allBodies: null,
+                allConstraints: null,
+                allComposites: null
+              }
             }, options);
           };
           Composite.setModified = function(composite, isModified, updateParents, updateChildren) {
             composite.isModified = isModified;
+            if (isModified && composite.cache) {
+              composite.cache.allBodies = null;
+              composite.cache.allConstraints = null;
+              composite.cache.allComposites = null;
+            }
             if (updateParents && composite.parent) {
               Composite.setModified(composite.parent, isModified, updateParents, updateChildren);
             }
@@ -891,7 +895,6 @@ var matter = createCommonjsModule(function(module, exports) {
             var position = Common.indexOf(compositeA.composites, compositeB);
             if (position !== -1) {
               Composite.removeCompositeAt(compositeA, position);
-              Composite.setModified(compositeA, true, true, false);
             }
             if (deep) {
               for (var i = 0; i < compositeA.composites.length; i++) {
@@ -914,7 +917,6 @@ var matter = createCommonjsModule(function(module, exports) {
             var position = Common.indexOf(composite.bodies, body);
             if (position !== -1) {
               Composite.removeBodyAt(composite, position);
-              Composite.setModified(composite, true, true, false);
             }
             if (deep) {
               for (var i = 0; i < composite.composites.length; i++) {
@@ -969,21 +971,39 @@ var matter = createCommonjsModule(function(module, exports) {
             return composite;
           };
           Composite.allBodies = function(composite) {
+            if (composite.cache && composite.cache.allBodies) {
+              return composite.cache.allBodies;
+            }
             var bodies = [].concat(composite.bodies);
             for (var i = 0; i < composite.composites.length; i++)
               bodies = bodies.concat(Composite.allBodies(composite.composites[i]));
+            if (composite.cache) {
+              composite.cache.allBodies = bodies;
+            }
             return bodies;
           };
           Composite.allConstraints = function(composite) {
+            if (composite.cache && composite.cache.allConstraints) {
+              return composite.cache.allConstraints;
+            }
             var constraints = [].concat(composite.constraints);
             for (var i = 0; i < composite.composites.length; i++)
               constraints = constraints.concat(Composite.allConstraints(composite.composites[i]));
+            if (composite.cache) {
+              composite.cache.allConstraints = constraints;
+            }
             return constraints;
           };
           Composite.allComposites = function(composite) {
+            if (composite.cache && composite.cache.allComposites) {
+              return composite.cache.allComposites;
+            }
             var composites = [].concat(composite.composites);
             for (var i = 0; i < composite.composites.length; i++)
               composites = composites.concat(Composite.allComposites(composite.composites[i]));
+            if (composite.cache) {
+              composite.cache.allComposites = composites;
+            }
             return composites;
           };
           Composite.get = function(composite, id, type) {
@@ -1016,7 +1036,6 @@ var matter = createCommonjsModule(function(module, exports) {
             for (var i = 0; i < objects.length; i++) {
               objects[i].id = Common.nextId();
             }
-            Composite.setModified(composite, true, true, false);
             return composite;
           };
           Composite.translate = function(composite, translation, recursive) {
@@ -1024,7 +1043,6 @@ var matter = createCommonjsModule(function(module, exports) {
             for (var i = 0; i < bodies.length; i++) {
               Body.translate(bodies[i], translation);
             }
-            Composite.setModified(composite, true, true, false);
             return composite;
           };
           Composite.rotate = function(composite, rotation, point, recursive) {
@@ -1037,7 +1055,6 @@ var matter = createCommonjsModule(function(module, exports) {
               });
               Body.rotate(body, rotation);
             }
-            Composite.setModified(composite, true, true, false);
             return composite;
           };
           Composite.scale = function(composite, scaleX, scaleY, point, recursive) {
@@ -1050,7 +1067,6 @@ var matter = createCommonjsModule(function(module, exports) {
               });
               Body.scale(body, scaleX, scaleY);
             }
-            Composite.setModified(composite, true, true, false);
             return composite;
           };
           Composite.bounds = function(composite) {
@@ -1072,7 +1088,7 @@ var matter = createCommonjsModule(function(module, exports) {
         var Render = __webpack_require__(16);
         var Common = __webpack_require__(0);
         var Bounds = __webpack_require__(1);
-        var Axes = __webpack_require__(10);
+        var Axes = __webpack_require__(11);
         (function() {
           Body._inertiaScale = 4;
           Body._nextCollidingGroupId = 1;
@@ -1567,13 +1583,246 @@ var matter = createCommonjsModule(function(module, exports) {
         })();
       },
       function(module2, exports2, __webpack_require__) {
+        var Collision = {};
+        module2.exports = Collision;
+        var Vertices = __webpack_require__(3);
+        var Pair = __webpack_require__(9);
+        (function() {
+          var _supports = [];
+          var _overlapAB = {
+            overlap: 0,
+            axis: null
+          };
+          var _overlapBA = {
+            overlap: 0,
+            axis: null
+          };
+          Collision.create = function(bodyA, bodyB) {
+            return {
+              pair: null,
+              collided: false,
+              bodyA,
+              bodyB,
+              parentA: bodyA.parent,
+              parentB: bodyB.parent,
+              depth: 0,
+              normal: {x: 0, y: 0},
+              tangent: {x: 0, y: 0},
+              penetration: {x: 0, y: 0},
+              supports: []
+            };
+          };
+          Collision.collides = function(bodyA, bodyB, pairs) {
+            Collision._overlapAxes(_overlapAB, bodyA.vertices, bodyB.vertices, bodyA.axes);
+            if (_overlapAB.overlap <= 0) {
+              return null;
+            }
+            Collision._overlapAxes(_overlapBA, bodyB.vertices, bodyA.vertices, bodyB.axes);
+            if (_overlapBA.overlap <= 0) {
+              return null;
+            }
+            var pair = pairs && pairs.table[Pair.id(bodyA, bodyB)], collision;
+            if (!pair) {
+              collision = Collision.create(bodyA, bodyB);
+              collision.collided = true;
+              collision.bodyA = bodyA.id < bodyB.id ? bodyA : bodyB;
+              collision.bodyB = bodyA.id < bodyB.id ? bodyB : bodyA;
+              collision.parentA = collision.bodyA.parent;
+              collision.parentB = collision.bodyB.parent;
+            } else {
+              collision = pair.collision;
+            }
+            bodyA = collision.bodyA;
+            bodyB = collision.bodyB;
+            var minOverlap;
+            if (_overlapAB.overlap < _overlapBA.overlap) {
+              minOverlap = _overlapAB;
+            } else {
+              minOverlap = _overlapBA;
+            }
+            var normal = collision.normal, supports = collision.supports, minAxis = minOverlap.axis, minAxisX = minAxis.x, minAxisY = minAxis.y;
+            if (minAxisX * (bodyB.position.x - bodyA.position.x) + minAxisY * (bodyB.position.y - bodyA.position.y) < 0) {
+              normal.x = minAxisX;
+              normal.y = minAxisY;
+            } else {
+              normal.x = -minAxisX;
+              normal.y = -minAxisY;
+            }
+            collision.tangent.x = -normal.y;
+            collision.tangent.y = normal.x;
+            collision.depth = minOverlap.overlap;
+            collision.penetration.x = normal.x * collision.depth;
+            collision.penetration.y = normal.y * collision.depth;
+            var supportsB = Collision._findSupports(bodyA, bodyB, normal, 1), supportCount = 0;
+            if (Vertices.contains(bodyA.vertices, supportsB[0])) {
+              supports[supportCount++] = supportsB[0];
+            }
+            if (Vertices.contains(bodyA.vertices, supportsB[1])) {
+              supports[supportCount++] = supportsB[1];
+            }
+            if (supportCount < 2) {
+              var supportsA = Collision._findSupports(bodyB, bodyA, normal, -1);
+              if (Vertices.contains(bodyB.vertices, supportsA[0])) {
+                supports[supportCount++] = supportsA[0];
+              }
+              if (supportCount < 2 && Vertices.contains(bodyB.vertices, supportsA[1])) {
+                supports[supportCount++] = supportsA[1];
+              }
+            }
+            if (supportCount === 0) {
+              supports[supportCount++] = supportsB[0];
+            }
+            supports.length = supportCount;
+            return collision;
+          };
+          Collision._overlapAxes = function(result, verticesA, verticesB, axes) {
+            var verticesALength = verticesA.length, verticesBLength = verticesB.length, verticesAX = verticesA[0].x, verticesAY = verticesA[0].y, verticesBX = verticesB[0].x, verticesBY = verticesB[0].y, axesLength = axes.length, overlapMin = Number.MAX_VALUE, overlapAxisNumber = 0, overlap, overlapAB, overlapBA, dot, i, j;
+            for (i = 0; i < axesLength; i++) {
+              var axis = axes[i], axisX = axis.x, axisY = axis.y, minA = verticesAX * axisX + verticesAY * axisY, minB = verticesBX * axisX + verticesBY * axisY, maxA = minA, maxB = minB;
+              for (j = 1; j < verticesALength; j += 1) {
+                dot = verticesA[j].x * axisX + verticesA[j].y * axisY;
+                if (dot > maxA) {
+                  maxA = dot;
+                } else if (dot < minA) {
+                  minA = dot;
+                }
+              }
+              for (j = 1; j < verticesBLength; j += 1) {
+                dot = verticesB[j].x * axisX + verticesB[j].y * axisY;
+                if (dot > maxB) {
+                  maxB = dot;
+                } else if (dot < minB) {
+                  minB = dot;
+                }
+              }
+              overlapAB = maxA - minB;
+              overlapBA = maxB - minA;
+              overlap = overlapAB < overlapBA ? overlapAB : overlapBA;
+              if (overlap < overlapMin) {
+                overlapMin = overlap;
+                overlapAxisNumber = i;
+                if (overlap <= 0) {
+                  break;
+                }
+              }
+            }
+            result.axis = axes[overlapAxisNumber];
+            result.overlap = overlapMin;
+          };
+          Collision._projectToAxis = function(projection, vertices, axis) {
+            var min = vertices[0].x * axis.x + vertices[0].y * axis.y, max = min;
+            for (var i = 1; i < vertices.length; i += 1) {
+              var dot = vertices[i].x * axis.x + vertices[i].y * axis.y;
+              if (dot > max) {
+                max = dot;
+              } else if (dot < min) {
+                min = dot;
+              }
+            }
+            projection.min = min;
+            projection.max = max;
+          };
+          Collision._findSupports = function(bodyA, bodyB, normal, direction) {
+            var vertices = bodyB.vertices, verticesLength = vertices.length, bodyAPositionX = bodyA.position.x, bodyAPositionY = bodyA.position.y, normalX = normal.x * direction, normalY = normal.y * direction, nearestDistance = Number.MAX_VALUE, vertexA, vertexB, vertexC, distance, j;
+            for (j = 0; j < verticesLength; j += 1) {
+              vertexB = vertices[j];
+              distance = normalX * (bodyAPositionX - vertexB.x) + normalY * (bodyAPositionY - vertexB.y);
+              if (distance < nearestDistance) {
+                nearestDistance = distance;
+                vertexA = vertexB;
+              }
+            }
+            vertexC = vertices[(verticesLength + vertexA.index - 1) % verticesLength];
+            nearestDistance = normalX * (bodyAPositionX - vertexC.x) + normalY * (bodyAPositionY - vertexC.y);
+            vertexB = vertices[(vertexA.index + 1) % verticesLength];
+            if (normalX * (bodyAPositionX - vertexB.x) + normalY * (bodyAPositionY - vertexB.y) < nearestDistance) {
+              _supports[0] = vertexA;
+              _supports[1] = vertexB;
+              return _supports;
+            }
+            _supports[0] = vertexA;
+            _supports[1] = vertexC;
+            return _supports;
+          };
+        })();
+      },
+      function(module2, exports2, __webpack_require__) {
+        var Pair = {};
+        module2.exports = Pair;
+        var Contact = __webpack_require__(17);
+        (function() {
+          Pair.create = function(collision, timestamp) {
+            var bodyA = collision.bodyA, bodyB = collision.bodyB;
+            var pair = {
+              id: Pair.id(bodyA, bodyB),
+              bodyA,
+              bodyB,
+              collision,
+              contacts: [],
+              activeContacts: [],
+              separation: 0,
+              isActive: true,
+              confirmedActive: true,
+              isSensor: bodyA.isSensor || bodyB.isSensor,
+              timeCreated: timestamp,
+              timeUpdated: timestamp,
+              inverseMass: 0,
+              friction: 0,
+              frictionStatic: 0,
+              restitution: 0,
+              slop: 0
+            };
+            Pair.update(pair, collision, timestamp);
+            return pair;
+          };
+          Pair.update = function(pair, collision, timestamp) {
+            var contacts = pair.contacts, supports = collision.supports, activeContacts = pair.activeContacts, parentA = collision.parentA, parentB = collision.parentB, parentAVerticesLength = parentA.vertices.length;
+            pair.isActive = true;
+            pair.timeUpdated = timestamp;
+            pair.collision = collision;
+            pair.separation = collision.depth;
+            pair.inverseMass = parentA.inverseMass + parentB.inverseMass;
+            pair.friction = parentA.friction < parentB.friction ? parentA.friction : parentB.friction;
+            pair.frictionStatic = parentA.frictionStatic > parentB.frictionStatic ? parentA.frictionStatic : parentB.frictionStatic;
+            pair.restitution = parentA.restitution > parentB.restitution ? parentA.restitution : parentB.restitution;
+            pair.slop = parentA.slop > parentB.slop ? parentA.slop : parentB.slop;
+            collision.pair = pair;
+            activeContacts.length = 0;
+            for (var i = 0; i < supports.length; i++) {
+              var support = supports[i], contactId = support.body === parentA ? support.index : parentAVerticesLength + support.index, contact = contacts[contactId];
+              if (contact) {
+                activeContacts.push(contact);
+              } else {
+                activeContacts.push(contacts[contactId] = Contact.create(support));
+              }
+            }
+          };
+          Pair.setActive = function(pair, isActive, timestamp) {
+            if (isActive) {
+              pair.isActive = true;
+              pair.timeUpdated = timestamp;
+            } else {
+              pair.isActive = false;
+              pair.activeContacts.length = 0;
+            }
+          };
+          Pair.id = function(bodyA, bodyB) {
+            if (bodyA.id < bodyB.id) {
+              return "A" + bodyA.id + "B" + bodyB.id;
+            } else {
+              return "A" + bodyB.id + "B" + bodyA.id;
+            }
+          };
+        })();
+      },
+      function(module2, exports2, __webpack_require__) {
         var Constraint = {};
         module2.exports = Constraint;
         var Vertices = __webpack_require__(3);
         var Vector = __webpack_require__(2);
         var Sleeping = __webpack_require__(7);
         var Bounds = __webpack_require__(1);
-        var Axes = __webpack_require__(10);
+        var Axes = __webpack_require__(11);
         var Common = __webpack_require__(0);
         (function() {
           Constraint._warming = 0.4;
@@ -1737,77 +1986,6 @@ var matter = createCommonjsModule(function(module, exports) {
               x: (constraint.bodyB ? constraint.bodyB.position.x : 0) + constraint.pointB.x,
               y: (constraint.bodyB ? constraint.bodyB.position.y : 0) + constraint.pointB.y
             };
-          };
-        })();
-      },
-      function(module2, exports2, __webpack_require__) {
-        var Pair = {};
-        module2.exports = Pair;
-        var Contact = __webpack_require__(17);
-        (function() {
-          Pair.create = function(collision, timestamp) {
-            var bodyA = collision.bodyA, bodyB = collision.bodyB, parentA = collision.parentA, parentB = collision.parentB;
-            var pair = {
-              id: Pair.id(bodyA, bodyB),
-              bodyA,
-              bodyB,
-              contacts: {},
-              activeContacts: [],
-              separation: 0,
-              isActive: true,
-              confirmedActive: true,
-              isSensor: bodyA.isSensor || bodyB.isSensor,
-              timeCreated: timestamp,
-              timeUpdated: timestamp,
-              inverseMass: parentA.inverseMass + parentB.inverseMass,
-              friction: Math.min(parentA.friction, parentB.friction),
-              frictionStatic: Math.max(parentA.frictionStatic, parentB.frictionStatic),
-              restitution: Math.max(parentA.restitution, parentB.restitution),
-              slop: Math.max(parentA.slop, parentB.slop)
-            };
-            Pair.update(pair, collision, timestamp);
-            return pair;
-          };
-          Pair.update = function(pair, collision, timestamp) {
-            var contacts = pair.contacts, supports = collision.supports, activeContacts = pair.activeContacts, parentA = collision.parentA, parentB = collision.parentB;
-            pair.collision = collision;
-            pair.inverseMass = parentA.inverseMass + parentB.inverseMass;
-            pair.friction = Math.min(parentA.friction, parentB.friction);
-            pair.frictionStatic = Math.max(parentA.frictionStatic, parentB.frictionStatic);
-            pair.restitution = Math.max(parentA.restitution, parentB.restitution);
-            pair.slop = Math.max(parentA.slop, parentB.slop);
-            activeContacts.length = 0;
-            if (collision.collided) {
-              for (var i = 0; i < supports.length; i++) {
-                var support = supports[i], contactId = Contact.id(support), contact = contacts[contactId];
-                if (contact) {
-                  activeContacts.push(contact);
-                } else {
-                  activeContacts.push(contacts[contactId] = Contact.create(support));
-                }
-              }
-              pair.separation = collision.depth;
-              Pair.setActive(pair, true, timestamp);
-            } else {
-              if (pair.isActive === true)
-                Pair.setActive(pair, false, timestamp);
-            }
-          };
-          Pair.setActive = function(pair, isActive, timestamp) {
-            if (isActive) {
-              pair.isActive = true;
-              pair.timeUpdated = timestamp;
-            } else {
-              pair.isActive = false;
-              pair.activeContacts.length = 0;
-            }
-          };
-          Pair.id = function(bodyA, bodyB) {
-            if (bodyA.id < bodyB.id) {
-              return "A" + bodyA.id + "B" + bodyB.id;
-            } else {
-              return "A" + bodyB.id + "B" + bodyA.id;
-            }
           };
         })();
       },
@@ -2134,32 +2312,58 @@ var matter = createCommonjsModule(function(module, exports) {
       function(module2, exports2, __webpack_require__) {
         var Detector = {};
         module2.exports = Detector;
-        var SAT = __webpack_require__(14);
-        var Pair = __webpack_require__(9);
-        var Bounds = __webpack_require__(1);
+        var Common = __webpack_require__(0);
+        var Collision = __webpack_require__(8);
         (function() {
-          Detector.collisions = function(broadphasePairs, engine) {
-            var collisions = [], pairsTable = engine.pairs.table;
-            for (var i = 0; i < broadphasePairs.length; i++) {
-              var bodyA = broadphasePairs[i][0], bodyB = broadphasePairs[i][1];
-              if ((bodyA.isStatic || bodyA.isSleeping) && (bodyB.isStatic || bodyB.isSleeping))
-                continue;
-              if (!Detector.canCollide(bodyA.collisionFilter, bodyB.collisionFilter))
-                continue;
-              if (Bounds.overlaps(bodyA.bounds, bodyB.bounds)) {
-                for (var j = bodyA.parts.length > 1 ? 1 : 0; j < bodyA.parts.length; j++) {
-                  var partA = bodyA.parts[j];
-                  for (var k = bodyB.parts.length > 1 ? 1 : 0; k < bodyB.parts.length; k++) {
-                    var partB = bodyB.parts[k];
-                    if (partA === bodyA && partB === bodyB || Bounds.overlaps(partA.bounds, partB.bounds)) {
-                      var pairId = Pair.id(partA, partB), pair = pairsTable[pairId], previousCollision;
-                      if (pair && pair.isActive) {
-                        previousCollision = pair.collision;
-                      } else {
-                        previousCollision = null;
+          Detector.create = function(options) {
+            var defaults = {
+              bodies: [],
+              pairs: null
+            };
+            return Common.extend(defaults, options);
+          };
+          Detector.setBodies = function(detector, bodies) {
+            detector.bodies = bodies.slice(0);
+          };
+          Detector.clear = function(detector) {
+            detector.bodies = [];
+          };
+          Detector.collisions = function(detector) {
+            var collisions = [], pairs = detector.pairs, bodies = detector.bodies, bodiesLength = bodies.length, canCollide = Detector.canCollide, collides = Collision.collides, i, j;
+            bodies.sort(Detector._compareBoundsX);
+            for (i = 0; i < bodiesLength; i++) {
+              var bodyA = bodies[i], boundsA = bodyA.bounds, boundXMax = bodyA.bounds.max.x, boundYMax = bodyA.bounds.max.y, boundYMin = bodyA.bounds.min.y, bodyAStatic = bodyA.isStatic || bodyA.isSleeping, partsALength = bodyA.parts.length, partsASingle = partsALength === 1;
+              for (j = i + 1; j < bodiesLength; j++) {
+                var bodyB = bodies[j], boundsB = bodyB.bounds;
+                if (boundsB.min.x > boundXMax) {
+                  break;
+                }
+                if (boundYMax < boundsB.min.y || boundYMin > boundsB.max.y) {
+                  continue;
+                }
+                if (bodyAStatic && (bodyB.isStatic || bodyB.isSleeping)) {
+                  continue;
+                }
+                if (!canCollide(bodyA.collisionFilter, bodyB.collisionFilter)) {
+                  continue;
+                }
+                var partsBLength = bodyB.parts.length;
+                if (partsASingle && partsBLength === 1) {
+                  var collision = collides(bodyA, bodyB, pairs);
+                  if (collision) {
+                    collisions.push(collision);
+                  }
+                } else {
+                  var partsAStart = partsALength > 1 ? 1 : 0, partsBStart = partsBLength > 1 ? 1 : 0;
+                  for (var k = partsAStart; k < partsALength; k++) {
+                    var partA = bodyA.parts[k], boundsA = partA.bounds;
+                    for (var z = partsBStart; z < partsBLength; z++) {
+                      var partB = bodyB.parts[z], boundsB = partB.bounds;
+                      if (boundsA.min.x > boundsB.max.x || boundsA.max.x < boundsB.min.x || boundsA.max.y < boundsB.min.y || boundsA.min.y > boundsB.max.y) {
+                        continue;
                       }
-                      var collision = SAT.collides(partA, partB, previousCollision);
-                      if (collision.collided) {
+                      var collision = collides(partA, partB, pairs);
+                      if (collision) {
                         collisions.push(collision);
                       }
                     }
@@ -2174,150 +2378,8 @@ var matter = createCommonjsModule(function(module, exports) {
               return filterA.group > 0;
             return (filterA.mask & filterB.category) !== 0 && (filterB.mask & filterA.category) !== 0;
           };
-        })();
-      },
-      function(module2, exports2, __webpack_require__) {
-        var SAT = {};
-        module2.exports = SAT;
-        var Vertices = __webpack_require__(3);
-        var Vector = __webpack_require__(2);
-        (function() {
-          SAT.collides = function(bodyA, bodyB, previousCollision) {
-            var overlapAB, overlapBA, minOverlap, collision, canReusePrevCol = false;
-            if (previousCollision) {
-              var parentA = bodyA.parent, parentB = bodyB.parent, motion = parentA.speed * parentA.speed + parentA.angularSpeed * parentA.angularSpeed + parentB.speed * parentB.speed + parentB.angularSpeed * parentB.angularSpeed;
-              canReusePrevCol = previousCollision && previousCollision.collided && motion < 0.2;
-              collision = previousCollision;
-            } else {
-              collision = {collided: false, bodyA, bodyB};
-            }
-            if (previousCollision && canReusePrevCol) {
-              var axisBodyA = collision.axisBody, axisBodyB = axisBodyA === bodyA ? bodyB : bodyA, axes = [axisBodyA.axes[previousCollision.axisNumber]];
-              minOverlap = SAT._overlapAxes(axisBodyA.vertices, axisBodyB.vertices, axes);
-              collision.reused = true;
-              if (minOverlap.overlap <= 0) {
-                collision.collided = false;
-                return collision;
-              }
-            } else {
-              overlapAB = SAT._overlapAxes(bodyA.vertices, bodyB.vertices, bodyA.axes);
-              if (overlapAB.overlap <= 0) {
-                collision.collided = false;
-                return collision;
-              }
-              overlapBA = SAT._overlapAxes(bodyB.vertices, bodyA.vertices, bodyB.axes);
-              if (overlapBA.overlap <= 0) {
-                collision.collided = false;
-                return collision;
-              }
-              if (overlapAB.overlap < overlapBA.overlap) {
-                minOverlap = overlapAB;
-                collision.axisBody = bodyA;
-              } else {
-                minOverlap = overlapBA;
-                collision.axisBody = bodyB;
-              }
-              collision.axisNumber = minOverlap.axisNumber;
-            }
-            collision.bodyA = bodyA.id < bodyB.id ? bodyA : bodyB;
-            collision.bodyB = bodyA.id < bodyB.id ? bodyB : bodyA;
-            collision.collided = true;
-            collision.depth = minOverlap.overlap;
-            collision.parentA = collision.bodyA.parent;
-            collision.parentB = collision.bodyB.parent;
-            bodyA = collision.bodyA;
-            bodyB = collision.bodyB;
-            if (Vector.dot(minOverlap.axis, Vector.sub(bodyB.position, bodyA.position)) < 0) {
-              collision.normal = {
-                x: minOverlap.axis.x,
-                y: minOverlap.axis.y
-              };
-            } else {
-              collision.normal = {
-                x: -minOverlap.axis.x,
-                y: -minOverlap.axis.y
-              };
-            }
-            collision.tangent = Vector.perp(collision.normal);
-            collision.penetration = collision.penetration || {};
-            collision.penetration.x = collision.normal.x * collision.depth;
-            collision.penetration.y = collision.normal.y * collision.depth;
-            var verticesB = SAT._findSupports(bodyA, bodyB, collision.normal), supports = [];
-            if (Vertices.contains(bodyA.vertices, verticesB[0]))
-              supports.push(verticesB[0]);
-            if (Vertices.contains(bodyA.vertices, verticesB[1]))
-              supports.push(verticesB[1]);
-            if (supports.length < 2) {
-              var verticesA = SAT._findSupports(bodyB, bodyA, Vector.neg(collision.normal));
-              if (Vertices.contains(bodyB.vertices, verticesA[0]))
-                supports.push(verticesA[0]);
-              if (supports.length < 2 && Vertices.contains(bodyB.vertices, verticesA[1]))
-                supports.push(verticesA[1]);
-            }
-            if (supports.length < 1)
-              supports = [verticesB[0]];
-            collision.supports = supports;
-            return collision;
-          };
-          SAT._overlapAxes = function(verticesA, verticesB, axes) {
-            var projectionA = Vector._temp[0], projectionB = Vector._temp[1], result = {overlap: Number.MAX_VALUE}, overlap, axis;
-            for (var i = 0; i < axes.length; i++) {
-              axis = axes[i];
-              SAT._projectToAxis(projectionA, verticesA, axis);
-              SAT._projectToAxis(projectionB, verticesB, axis);
-              overlap = Math.min(projectionA.max - projectionB.min, projectionB.max - projectionA.min);
-              if (overlap <= 0) {
-                result.overlap = overlap;
-                return result;
-              }
-              if (overlap < result.overlap) {
-                result.overlap = overlap;
-                result.axis = axis;
-                result.axisNumber = i;
-              }
-            }
-            return result;
-          };
-          SAT._projectToAxis = function(projection, vertices, axis) {
-            var min = Vector.dot(vertices[0], axis), max = min;
-            for (var i = 1; i < vertices.length; i += 1) {
-              var dot = Vector.dot(vertices[i], axis);
-              if (dot > max) {
-                max = dot;
-              } else if (dot < min) {
-                min = dot;
-              }
-            }
-            projection.min = min;
-            projection.max = max;
-          };
-          SAT._findSupports = function(bodyA, bodyB, normal) {
-            var nearestDistance = Number.MAX_VALUE, vertexToBody = Vector._temp[0], vertices = bodyB.vertices, bodyAPosition = bodyA.position, distance, vertex, vertexA, vertexB;
-            for (var i = 0; i < vertices.length; i++) {
-              vertex = vertices[i];
-              vertexToBody.x = vertex.x - bodyAPosition.x;
-              vertexToBody.y = vertex.y - bodyAPosition.y;
-              distance = -Vector.dot(normal, vertexToBody);
-              if (distance < nearestDistance) {
-                nearestDistance = distance;
-                vertexA = vertex;
-              }
-            }
-            var prevIndex = vertexA.index - 1 >= 0 ? vertexA.index - 1 : vertices.length - 1;
-            vertex = vertices[prevIndex];
-            vertexToBody.x = vertex.x - bodyAPosition.x;
-            vertexToBody.y = vertex.y - bodyAPosition.y;
-            nearestDistance = -Vector.dot(normal, vertexToBody);
-            vertexB = vertex;
-            var nextIndex = (vertexA.index + 1) % vertices.length;
-            vertex = vertices[nextIndex];
-            vertexToBody.x = vertex.x - bodyAPosition.x;
-            vertexToBody.y = vertex.y - bodyAPosition.y;
-            distance = -Vector.dot(normal, vertexToBody);
-            if (distance < nearestDistance) {
-              vertexB = vertex;
-            }
-            return [vertexA, vertexB];
+          Detector._compareBoundsX = function(bodyA, bodyB) {
+            return bodyA.bounds.min.x - bodyB.bounds.min.x;
           };
         })();
       },
@@ -2432,7 +2494,7 @@ var matter = createCommonjsModule(function(module, exports) {
           };
           Plugin.dependencyParse = function(dependency) {
             if (Common.isString(dependency)) {
-              var pattern = /^[\w-]+(@(\*|[\^~]?\d+\.\d+\.\d+(-[0-9A-Za-z-]+)?))?$/;
+              var pattern = /^[\w-]+(@(\*|[\^~]?\d+\.\d+\.\d+(-[0-9A-Za-z-+]+)?))?$/;
               if (!pattern.test(dependency)) {
                 Common.warn("Plugin.dependencyParse:", dependency, "is not a valid dependency string.");
               }
@@ -2447,7 +2509,7 @@ var matter = createCommonjsModule(function(module, exports) {
             };
           };
           Plugin.versionParse = function(range) {
-            var pattern = /^(\*)|(\^|~|>=|>)?\s*((\d+)\.(\d+)\.(\d+))(-[0-9A-Za-z-]+)?$/;
+            var pattern = /^(\*)|(\^|~|>=|>)?\s*((\d+)\.(\d+)\.(\d+))(-[0-9A-Za-z-+]+)?$/;
             if (!pattern.test(range)) {
               Common.warn("Plugin.versionParse:", range, "is not a valid version or range.");
             }
@@ -2506,7 +2568,7 @@ var matter = createCommonjsModule(function(module, exports) {
         var Bounds = __webpack_require__(1);
         var Events = __webpack_require__(4);
         var Vector = __webpack_require__(2);
-        var Mouse = __webpack_require__(12);
+        var Mouse = __webpack_require__(13);
         (function() {
           var _requestAnimationFrame, _cancelAnimationFrame;
           if (typeof window !== "undefined") {
@@ -2553,7 +2615,6 @@ var matter = createCommonjsModule(function(module, exports) {
                 showDebug: false,
                 showStats: false,
                 showPerformance: false,
-                showBroadphase: false,
                 showBounds: false,
                 showVelocity: false,
                 showCollisions: false,
@@ -2588,6 +2649,7 @@ var matter = createCommonjsModule(function(module, exports) {
                 y: render.canvas.height
               }
             };
+            render.options.showBroadphase = false;
             if (render.options.pixelRatio !== 1) {
               Render.setPixelRatio(render, render.options.pixelRatio);
             }
@@ -2761,8 +2823,6 @@ var matter = createCommonjsModule(function(module, exports) {
             if (options.showMousePosition)
               Render.mousePosition(render, render.mouse, context);
             Render.constraints(constraints, context);
-            if (options.showBroadphase)
-              Render.grid(render, engine.grid, context);
             if (options.hasBounds) {
               Render.endViewTransform(render);
             }
@@ -3201,25 +3261,6 @@ var matter = createCommonjsModule(function(module, exports) {
             }
             c.stroke();
           };
-          Render.grid = function(render, grid, context) {
-            var c = context, options = render.options;
-            if (options.wireframes) {
-              c.strokeStyle = "rgba(255,180,0,0.1)";
-            } else {
-              c.strokeStyle = "rgba(255,180,0,0.5)";
-            }
-            c.beginPath();
-            var bucketKeys = Common.keys(grid.buckets);
-            for (var i = 0; i < bucketKeys.length; i++) {
-              var bucketId = bucketKeys[i];
-              if (grid.buckets[bucketId].length < 2)
-                continue;
-              var region = bucketId.split(/C|R/);
-              c.rect(0.5 + parseInt(region[1], 10) * grid.bucketWidth, 0.5 + parseInt(region[2], 10) * grid.bucketHeight, grid.bucketWidth, grid.bucketHeight);
-            }
-            c.lineWidth = 1;
-            c.stroke();
-          };
           Render.inspector = function(inspector, context) {
             var engine = inspector.engine, selected = inspector.selected, render = inspector.render, options = render.options, bounds;
             if (options.hasBounds) {
@@ -3334,14 +3375,10 @@ var matter = createCommonjsModule(function(module, exports) {
         (function() {
           Contact.create = function(vertex) {
             return {
-              id: Contact.id(vertex),
               vertex,
               normalImpulse: 0,
               tangentImpulse: 0
             };
-          };
-          Contact.id = function(vertex) {
-            return vertex.body.id + "_" + vertex.index;
           };
         })();
       },
@@ -3350,12 +3387,11 @@ var matter = createCommonjsModule(function(module, exports) {
         module2.exports = Engine;
         var Sleeping = __webpack_require__(7);
         var Resolver = __webpack_require__(19);
-        var Detector = __webpack_require__(13);
+        var Detector = __webpack_require__(14);
         var Pairs = __webpack_require__(20);
-        var Grid = __webpack_require__(21);
         var Events = __webpack_require__(4);
         var Composite = __webpack_require__(5);
-        var Constraint = __webpack_require__(8);
+        var Constraint = __webpack_require__(10);
         var Common = __webpack_require__(0);
         var Body = __webpack_require__(6);
         (function() {
@@ -3368,7 +3404,6 @@ var matter = createCommonjsModule(function(module, exports) {
               enableSleeping: false,
               events: [],
               plugin: {},
-              grid: null,
               gravity: {
                 x: 0,
                 y: 1,
@@ -3383,8 +3418,9 @@ var matter = createCommonjsModule(function(module, exports) {
             };
             var engine = Common.extend(defaults, options);
             engine.world = options.world || Composite.create({label: "World"});
-            engine.grid = Grid.create(options.grid || options.broadphase);
-            engine.pairs = Pairs.create();
+            engine.pairs = options.pairs || Pairs.create();
+            engine.detector = options.detector || Detector.create();
+            engine.grid = {buckets: []};
             engine.world.gravity = engine.gravity;
             engine.broadphase = engine.grid;
             engine.metrics = {};
@@ -3394,7 +3430,7 @@ var matter = createCommonjsModule(function(module, exports) {
             var startTime = Common.now();
             delta = delta || 1e3 / 60;
             correction = correction || 1;
-            var world = engine.world, timing = engine.timing, grid = engine.grid, gridPairs = [], i;
+            var world = engine.world, detector = engine.detector, pairs = engine.pairs, timing = engine.timing, timestamp = timing.timestamp, i;
             timing.timestamp += delta * timing.timeScale;
             timing.lastDelta = delta * timing.timeScale;
             var event = {
@@ -3402,6 +3438,12 @@ var matter = createCommonjsModule(function(module, exports) {
             };
             Events.trigger(engine, "beforeUpdate", event);
             var allBodies = Composite.allBodies(world), allConstraints = Composite.allConstraints(world);
+            if (world.isModified) {
+              Detector.setBodies(detector, allBodies);
+            }
+            if (world.isModified) {
+              Composite.setModified(world, false, false, true);
+            }
             if (engine.enableSleeping)
               Sleeping.update(allBodies, timing.timeScale);
             Engine._bodiesApplyGravity(allBodies, engine.gravity);
@@ -3411,17 +3453,9 @@ var matter = createCommonjsModule(function(module, exports) {
               Constraint.solveAll(allConstraints, timing.timeScale);
             }
             Constraint.postSolveAll(allBodies);
-            if (world.isModified)
-              Grid.clear(grid);
-            Grid.update(grid, allBodies, engine, world.isModified);
-            gridPairs = grid.pairsList;
-            if (world.isModified) {
-              Composite.setModified(world, false, false, true);
-            }
-            var collisions = Detector.collisions(gridPairs, engine);
-            var pairs = engine.pairs, timestamp = timing.timestamp;
+            detector.pairs = engine.pairs;
+            var collisions = Detector.collisions(detector);
             Pairs.update(pairs, collisions, timestamp);
-            Pairs.removeOld(pairs, timestamp);
             if (engine.enableSleeping)
               Sleeping.afterCollisions(pairs.list, timing.timeScale);
             if (pairs.collisionStart.length > 0)
@@ -3463,10 +3497,8 @@ var matter = createCommonjsModule(function(module, exports) {
             }
           };
           Engine.clear = function(engine) {
-            var world = engine.world, bodies = Composite.allBodies(world);
             Pairs.clear(engine.pairs);
-            Grid.clear(engine.grid);
-            Grid.update(engine.grid, bodies, engine, true);
+            Detector.clear(engine.detector);
           };
           Engine._bodiesClearForces = function(bodies) {
             for (var i = 0; i < bodies.length; i++) {
@@ -3503,8 +3535,6 @@ var matter = createCommonjsModule(function(module, exports) {
         var Resolver = {};
         module2.exports = Resolver;
         var Vertices = __webpack_require__(3);
-        var Vector = __webpack_require__(2);
-        var Common = __webpack_require__(0);
         var Bounds = __webpack_require__(1);
         (function() {
           Resolver._restingThresh = 4;
@@ -3513,8 +3543,8 @@ var matter = createCommonjsModule(function(module, exports) {
           Resolver._positionWarming = 0.8;
           Resolver._frictionNormalMultiplier = 5;
           Resolver.preSolvePosition = function(pairs) {
-            var i, pair, activeCount;
-            for (i = 0; i < pairs.length; i++) {
+            var i, pair, activeCount, pairsLength = pairs.length;
+            for (i = 0; i < pairsLength; i++) {
               pair = pairs[i];
               if (!pair.isActive)
                 continue;
@@ -3524,8 +3554,8 @@ var matter = createCommonjsModule(function(module, exports) {
             }
           };
           Resolver.solvePosition = function(pairs, timeScale) {
-            var i, pair, collision, bodyA, bodyB, normal, bodyBtoA, contactShare, positionImpulse, tempA = Vector._temp[0], tempB = Vector._temp[1], tempC = Vector._temp[2], tempD = Vector._temp[3];
-            for (i = 0; i < pairs.length; i++) {
+            var i, pair, collision, bodyA, bodyB, normal, contactShare, positionImpulse, positionDampen = Resolver._positionDampen, pairsLength = pairs.length;
+            for (i = 0; i < pairsLength; i++) {
               pair = pairs[i];
               if (!pair.isActive || pair.isSensor)
                 continue;
@@ -3533,10 +3563,9 @@ var matter = createCommonjsModule(function(module, exports) {
               bodyA = collision.parentA;
               bodyB = collision.parentB;
               normal = collision.normal;
-              bodyBtoA = Vector.sub(Vector.add(bodyB.positionImpulse, bodyB.position, tempA), Vector.add(bodyA.positionImpulse, Vector.sub(bodyB.position, collision.penetration, tempB), tempC), tempD);
-              pair.separation = Vector.dot(normal, bodyBtoA);
+              pair.separation = normal.x * (bodyB.positionImpulse.x + collision.penetration.x - bodyA.positionImpulse.x) + normal.y * (bodyB.positionImpulse.y + collision.penetration.y - bodyA.positionImpulse.y);
             }
-            for (i = 0; i < pairs.length; i++) {
+            for (i = 0; i < pairsLength; i++) {
               pair = pairs[i];
               if (!pair.isActive || pair.isSensor)
                 continue;
@@ -3548,127 +3577,134 @@ var matter = createCommonjsModule(function(module, exports) {
               if (bodyA.isStatic || bodyB.isStatic)
                 positionImpulse *= 2;
               if (!(bodyA.isStatic || bodyA.isSleeping)) {
-                contactShare = Resolver._positionDampen / bodyA.totalContacts;
+                contactShare = positionDampen / bodyA.totalContacts;
                 bodyA.positionImpulse.x += normal.x * positionImpulse * contactShare;
                 bodyA.positionImpulse.y += normal.y * positionImpulse * contactShare;
               }
               if (!(bodyB.isStatic || bodyB.isSleeping)) {
-                contactShare = Resolver._positionDampen / bodyB.totalContacts;
+                contactShare = positionDampen / bodyB.totalContacts;
                 bodyB.positionImpulse.x -= normal.x * positionImpulse * contactShare;
                 bodyB.positionImpulse.y -= normal.y * positionImpulse * contactShare;
               }
             }
           };
           Resolver.postSolvePosition = function(bodies) {
-            for (var i = 0; i < bodies.length; i++) {
-              var body = bodies[i];
+            var positionWarming = Resolver._positionWarming, bodiesLength = bodies.length, verticesTranslate = Vertices.translate, boundsUpdate = Bounds.update;
+            for (var i = 0; i < bodiesLength; i++) {
+              var body = bodies[i], positionImpulse = body.positionImpulse, positionImpulseX = positionImpulse.x, positionImpulseY = positionImpulse.y, velocity = body.velocity;
               body.totalContacts = 0;
-              if (body.positionImpulse.x !== 0 || body.positionImpulse.y !== 0) {
+              if (positionImpulseX !== 0 || positionImpulseY !== 0) {
                 for (var j = 0; j < body.parts.length; j++) {
                   var part = body.parts[j];
-                  Vertices.translate(part.vertices, body.positionImpulse);
-                  Bounds.update(part.bounds, part.vertices, body.velocity);
-                  part.position.x += body.positionImpulse.x;
-                  part.position.y += body.positionImpulse.y;
+                  verticesTranslate(part.vertices, positionImpulse);
+                  boundsUpdate(part.bounds, part.vertices, velocity);
+                  part.position.x += positionImpulseX;
+                  part.position.y += positionImpulseY;
                 }
-                body.positionPrev.x += body.positionImpulse.x;
-                body.positionPrev.y += body.positionImpulse.y;
-                if (Vector.dot(body.positionImpulse, body.velocity) < 0) {
-                  body.positionImpulse.x = 0;
-                  body.positionImpulse.y = 0;
+                body.positionPrev.x += positionImpulseX;
+                body.positionPrev.y += positionImpulseY;
+                if (positionImpulseX * velocity.x + positionImpulseY * velocity.y < 0) {
+                  positionImpulse.x = 0;
+                  positionImpulse.y = 0;
                 } else {
-                  body.positionImpulse.x *= Resolver._positionWarming;
-                  body.positionImpulse.y *= Resolver._positionWarming;
+                  positionImpulse.x *= positionWarming;
+                  positionImpulse.y *= positionWarming;
                 }
               }
             }
           };
           Resolver.preSolveVelocity = function(pairs) {
-            var i, j, pair, contacts, collision, bodyA, bodyB, normal, tangent, contact, contactVertex, normalImpulse, tangentImpulse, offset, impulse = Vector._temp[0], tempA = Vector._temp[1];
-            for (i = 0; i < pairs.length; i++) {
-              pair = pairs[i];
+            var pairsLength = pairs.length, i, j;
+            for (i = 0; i < pairsLength; i++) {
+              var pair = pairs[i];
               if (!pair.isActive || pair.isSensor)
                 continue;
-              contacts = pair.activeContacts;
-              collision = pair.collision;
-              bodyA = collision.parentA;
-              bodyB = collision.parentB;
-              normal = collision.normal;
-              tangent = collision.tangent;
-              for (j = 0; j < contacts.length; j++) {
-                contact = contacts[j];
-                contactVertex = contact.vertex;
-                normalImpulse = contact.normalImpulse;
-                tangentImpulse = contact.tangentImpulse;
+              var contacts = pair.activeContacts, contactsLength = contacts.length, collision = pair.collision, bodyA = collision.parentA, bodyB = collision.parentB, normal = collision.normal, tangent = collision.tangent;
+              for (j = 0; j < contactsLength; j++) {
+                var contact = contacts[j], contactVertex = contact.vertex, normalImpulse = contact.normalImpulse, tangentImpulse = contact.tangentImpulse;
                 if (normalImpulse !== 0 || tangentImpulse !== 0) {
-                  impulse.x = normal.x * normalImpulse + tangent.x * tangentImpulse;
-                  impulse.y = normal.y * normalImpulse + tangent.y * tangentImpulse;
+                  var impulseX = normal.x * normalImpulse + tangent.x * tangentImpulse, impulseY = normal.y * normalImpulse + tangent.y * tangentImpulse;
                   if (!(bodyA.isStatic || bodyA.isSleeping)) {
-                    offset = Vector.sub(contactVertex, bodyA.position, tempA);
-                    bodyA.positionPrev.x += impulse.x * bodyA.inverseMass;
-                    bodyA.positionPrev.y += impulse.y * bodyA.inverseMass;
-                    bodyA.anglePrev += Vector.cross(offset, impulse) * bodyA.inverseInertia;
+                    bodyA.positionPrev.x += impulseX * bodyA.inverseMass;
+                    bodyA.positionPrev.y += impulseY * bodyA.inverseMass;
+                    bodyA.anglePrev += bodyA.inverseInertia * ((contactVertex.x - bodyA.position.x) * impulseY - (contactVertex.y - bodyA.position.y) * impulseX);
                   }
                   if (!(bodyB.isStatic || bodyB.isSleeping)) {
-                    offset = Vector.sub(contactVertex, bodyB.position, tempA);
-                    bodyB.positionPrev.x -= impulse.x * bodyB.inverseMass;
-                    bodyB.positionPrev.y -= impulse.y * bodyB.inverseMass;
-                    bodyB.anglePrev -= Vector.cross(offset, impulse) * bodyB.inverseInertia;
+                    bodyB.positionPrev.x -= impulseX * bodyB.inverseMass;
+                    bodyB.positionPrev.y -= impulseY * bodyB.inverseMass;
+                    bodyB.anglePrev -= bodyB.inverseInertia * ((contactVertex.x - bodyB.position.x) * impulseY - (contactVertex.y - bodyB.position.y) * impulseX);
                   }
                 }
               }
             }
           };
           Resolver.solveVelocity = function(pairs, timeScale) {
-            var timeScaleSquared = timeScale * timeScale, impulse = Vector._temp[0], tempA = Vector._temp[1], tempB = Vector._temp[2], tempC = Vector._temp[3], tempD = Vector._temp[4], tempE = Vector._temp[5];
-            for (var i = 0; i < pairs.length; i++) {
+            var timeScaleSquared = timeScale * timeScale, restingThresh = Resolver._restingThresh * timeScaleSquared, frictionNormalMultiplier = Resolver._frictionNormalMultiplier, restingThreshTangent = Resolver._restingThreshTangent * timeScaleSquared, NumberMaxValue = Number.MAX_VALUE, pairsLength = pairs.length, tangentImpulse, maxFriction, i, j;
+            for (i = 0; i < pairsLength; i++) {
               var pair = pairs[i];
               if (!pair.isActive || pair.isSensor)
                 continue;
-              var collision = pair.collision, bodyA = collision.parentA, bodyB = collision.parentB, normal = collision.normal, tangent = collision.tangent, contacts = pair.activeContacts, contactShare = 1 / contacts.length;
-              bodyA.velocity.x = bodyA.position.x - bodyA.positionPrev.x;
-              bodyA.velocity.y = bodyA.position.y - bodyA.positionPrev.y;
-              bodyB.velocity.x = bodyB.position.x - bodyB.positionPrev.x;
-              bodyB.velocity.y = bodyB.position.y - bodyB.positionPrev.y;
+              var collision = pair.collision, bodyA = collision.parentA, bodyB = collision.parentB, bodyAVelocity = bodyA.velocity, bodyBVelocity = bodyB.velocity, normalX = collision.normal.x, normalY = collision.normal.y, tangentX = collision.tangent.x, tangentY = collision.tangent.y, contacts = pair.activeContacts, contactsLength = contacts.length, contactShare = 1 / contactsLength, inverseMassTotal = bodyA.inverseMass + bodyB.inverseMass, friction = pair.friction * pair.frictionStatic * frictionNormalMultiplier * timeScaleSquared;
+              bodyAVelocity.x = bodyA.position.x - bodyA.positionPrev.x;
+              bodyAVelocity.y = bodyA.position.y - bodyA.positionPrev.y;
+              bodyBVelocity.x = bodyB.position.x - bodyB.positionPrev.x;
+              bodyBVelocity.y = bodyB.position.y - bodyB.positionPrev.y;
               bodyA.angularVelocity = bodyA.angle - bodyA.anglePrev;
               bodyB.angularVelocity = bodyB.angle - bodyB.anglePrev;
-              for (var j = 0; j < contacts.length; j++) {
-                var contact = contacts[j], contactVertex = contact.vertex, offsetA = Vector.sub(contactVertex, bodyA.position, tempA), offsetB = Vector.sub(contactVertex, bodyB.position, tempB), velocityPointA = Vector.add(bodyA.velocity, Vector.mult(Vector.perp(offsetA), bodyA.angularVelocity), tempC), velocityPointB = Vector.add(bodyB.velocity, Vector.mult(Vector.perp(offsetB), bodyB.angularVelocity), tempD), relativeVelocity = Vector.sub(velocityPointA, velocityPointB, tempE), normalVelocity = Vector.dot(normal, relativeVelocity);
-                var tangentVelocity = Vector.dot(tangent, relativeVelocity), tangentSpeed = Math.abs(tangentVelocity), tangentVelocityDirection = Common.sign(tangentVelocity);
-                var normalImpulse = (1 + pair.restitution) * normalVelocity, normalForce = Common.clamp(pair.separation + normalVelocity, 0, 1) * Resolver._frictionNormalMultiplier;
-                var tangentImpulse = tangentVelocity, maxFriction = Infinity;
-                if (tangentSpeed > pair.friction * pair.frictionStatic * normalForce * timeScaleSquared) {
-                  maxFriction = tangentSpeed;
-                  tangentImpulse = Common.clamp(pair.friction * tangentVelocityDirection * timeScaleSquared, -maxFriction, maxFriction);
+              for (j = 0; j < contactsLength; j++) {
+                var contact = contacts[j], contactVertex = contact.vertex;
+                var offsetAX = contactVertex.x - bodyA.position.x, offsetAY = contactVertex.y - bodyA.position.y, offsetBX = contactVertex.x - bodyB.position.x, offsetBY = contactVertex.y - bodyB.position.y;
+                var velocityPointAX = bodyAVelocity.x - offsetAY * bodyA.angularVelocity, velocityPointAY = bodyAVelocity.y + offsetAX * bodyA.angularVelocity, velocityPointBX = bodyBVelocity.x - offsetBY * bodyB.angularVelocity, velocityPointBY = bodyBVelocity.y + offsetBX * bodyB.angularVelocity;
+                var relativeVelocityX = velocityPointAX - velocityPointBX, relativeVelocityY = velocityPointAY - velocityPointBY;
+                var normalVelocity = normalX * relativeVelocityX + normalY * relativeVelocityY, tangentVelocity = tangentX * relativeVelocityX + tangentY * relativeVelocityY;
+                var normalOverlap = pair.separation + normalVelocity;
+                var normalForce = Math.min(normalOverlap, 1);
+                normalForce = normalOverlap < 0 ? 0 : normalForce;
+                var frictionLimit = normalForce * friction;
+                if (tangentVelocity > frictionLimit || -tangentVelocity > frictionLimit) {
+                  maxFriction = tangentVelocity > 0 ? tangentVelocity : -tangentVelocity;
+                  tangentImpulse = pair.friction * (tangentVelocity > 0 ? 1 : -1) * timeScaleSquared;
+                  if (tangentImpulse < -maxFriction) {
+                    tangentImpulse = -maxFriction;
+                  } else if (tangentImpulse > maxFriction) {
+                    tangentImpulse = maxFriction;
+                  }
+                } else {
+                  tangentImpulse = tangentVelocity;
+                  maxFriction = NumberMaxValue;
                 }
-                var oAcN = Vector.cross(offsetA, normal), oBcN = Vector.cross(offsetB, normal), share = contactShare / (bodyA.inverseMass + bodyB.inverseMass + bodyA.inverseInertia * oAcN * oAcN + bodyB.inverseInertia * oBcN * oBcN);
-                normalImpulse *= share;
+                var oAcN = offsetAX * normalY - offsetAY * normalX, oBcN = offsetBX * normalY - offsetBY * normalX, share = contactShare / (inverseMassTotal + bodyA.inverseInertia * oAcN * oAcN + bodyB.inverseInertia * oBcN * oBcN);
+                var normalImpulse = (1 + pair.restitution) * normalVelocity * share;
                 tangentImpulse *= share;
-                if (normalVelocity < 0 && normalVelocity * normalVelocity > Resolver._restingThresh * timeScaleSquared) {
+                if (normalVelocity * normalVelocity > restingThresh && normalVelocity < 0) {
                   contact.normalImpulse = 0;
                 } else {
                   var contactNormalImpulse = contact.normalImpulse;
-                  contact.normalImpulse = Math.min(contact.normalImpulse + normalImpulse, 0);
+                  contact.normalImpulse += normalImpulse;
+                  contact.normalImpulse = Math.min(contact.normalImpulse, 0);
                   normalImpulse = contact.normalImpulse - contactNormalImpulse;
                 }
-                if (tangentVelocity * tangentVelocity > Resolver._restingThreshTangent * timeScaleSquared) {
+                if (tangentVelocity * tangentVelocity > restingThreshTangent) {
                   contact.tangentImpulse = 0;
                 } else {
                   var contactTangentImpulse = contact.tangentImpulse;
-                  contact.tangentImpulse = Common.clamp(contact.tangentImpulse + tangentImpulse, -maxFriction, maxFriction);
+                  contact.tangentImpulse += tangentImpulse;
+                  if (contact.tangentImpulse < -maxFriction)
+                    contact.tangentImpulse = -maxFriction;
+                  if (contact.tangentImpulse > maxFriction)
+                    contact.tangentImpulse = maxFriction;
                   tangentImpulse = contact.tangentImpulse - contactTangentImpulse;
                 }
-                impulse.x = normal.x * normalImpulse + tangent.x * tangentImpulse;
-                impulse.y = normal.y * normalImpulse + tangent.y * tangentImpulse;
+                var impulseX = normalX * normalImpulse + tangentX * tangentImpulse, impulseY = normalY * normalImpulse + tangentY * tangentImpulse;
                 if (!(bodyA.isStatic || bodyA.isSleeping)) {
-                  bodyA.positionPrev.x += impulse.x * bodyA.inverseMass;
-                  bodyA.positionPrev.y += impulse.y * bodyA.inverseMass;
-                  bodyA.anglePrev += Vector.cross(offsetA, impulse) * bodyA.inverseInertia;
+                  bodyA.positionPrev.x += impulseX * bodyA.inverseMass;
+                  bodyA.positionPrev.y += impulseY * bodyA.inverseMass;
+                  bodyA.anglePrev += (offsetAX * impulseY - offsetAY * impulseX) * bodyA.inverseInertia;
                 }
                 if (!(bodyB.isStatic || bodyB.isSleeping)) {
-                  bodyB.positionPrev.x -= impulse.x * bodyB.inverseMass;
-                  bodyB.positionPrev.y -= impulse.y * bodyB.inverseMass;
-                  bodyB.anglePrev -= Vector.cross(offsetB, impulse) * bodyB.inverseInertia;
+                  bodyB.positionPrev.x -= impulseX * bodyB.inverseMass;
+                  bodyB.positionPrev.y -= impulseY * bodyB.inverseMass;
+                  bodyB.anglePrev -= (offsetBX * impulseY - offsetBY * impulseX) * bodyB.inverseInertia;
                 }
               }
             }
@@ -3681,7 +3717,6 @@ var matter = createCommonjsModule(function(module, exports) {
         var Pair = __webpack_require__(9);
         var Common = __webpack_require__(0);
         (function() {
-          Pairs._pairMaxIdleLife = 1e3;
           Pairs.create = function(options) {
             return Common.extend({
               table: {},
@@ -3692,60 +3727,48 @@ var matter = createCommonjsModule(function(module, exports) {
             }, options);
           };
           Pairs.update = function(pairs, collisions, timestamp) {
-            var pairsList = pairs.list, pairsTable = pairs.table, collisionStart = pairs.collisionStart, collisionEnd = pairs.collisionEnd, collisionActive = pairs.collisionActive, collision, pairId, pair, i;
+            var pairsList = pairs.list, pairsListLength = pairsList.length, pairsTable = pairs.table, collisionsLength = collisions.length, collisionStart = pairs.collisionStart, collisionEnd = pairs.collisionEnd, collisionActive = pairs.collisionActive, collision, pairIndex, pair, i;
             collisionStart.length = 0;
             collisionEnd.length = 0;
             collisionActive.length = 0;
-            for (i = 0; i < pairsList.length; i++) {
+            for (i = 0; i < pairsListLength; i++) {
               pairsList[i].confirmedActive = false;
             }
-            for (i = 0; i < collisions.length; i++) {
+            for (i = 0; i < collisionsLength; i++) {
               collision = collisions[i];
-              if (collision.collided) {
-                pairId = Pair.id(collision.bodyA, collision.bodyB);
-                pair = pairsTable[pairId];
-                if (pair) {
-                  if (pair.isActive) {
-                    collisionActive.push(pair);
-                  } else {
-                    collisionStart.push(pair);
-                  }
-                  Pair.update(pair, collision, timestamp);
-                  pair.confirmedActive = true;
+              pair = collision.pair;
+              if (pair) {
+                if (pair.isActive) {
+                  collisionActive.push(pair);
                 } else {
-                  pair = Pair.create(collision, timestamp);
-                  pairsTable[pairId] = pair;
                   collisionStart.push(pair);
-                  pairsList.push(pair);
+                }
+                Pair.update(pair, collision, timestamp);
+                pair.confirmedActive = true;
+              } else {
+                pair = Pair.create(collision, timestamp);
+                pairsTable[pair.id] = pair;
+                collisionStart.push(pair);
+                pairsList.push(pair);
+              }
+            }
+            var removePairIndex = [];
+            pairsListLength = pairsList.length;
+            for (i = 0; i < pairsListLength; i++) {
+              pair = pairsList[i];
+              if (!pair.confirmedActive) {
+                Pair.setActive(pair, false, timestamp);
+                collisionEnd.push(pair);
+                if (!pair.collision.bodyA.isSleeping && !pair.collision.bodyB.isSleeping) {
+                  removePairIndex.push(i);
                 }
               }
             }
-            for (i = 0; i < pairsList.length; i++) {
-              pair = pairsList[i];
-              if (pair.isActive && !pair.confirmedActive) {
-                Pair.setActive(pair, false, timestamp);
-                collisionEnd.push(pair);
-              }
-            }
-          };
-          Pairs.removeOld = function(pairs, timestamp) {
-            var pairsList = pairs.list, pairsTable = pairs.table, indexesToRemove = [], pair, collision, pairIndex, i;
-            for (i = 0; i < pairsList.length; i++) {
-              pair = pairsList[i];
-              collision = pair.collision;
-              if (collision.bodyA.isSleeping || collision.bodyB.isSleeping) {
-                pair.timeUpdated = timestamp;
-                continue;
-              }
-              if (timestamp - pair.timeUpdated > Pairs._pairMaxIdleLife) {
-                indexesToRemove.push(i);
-              }
-            }
-            for (i = 0; i < indexesToRemove.length; i++) {
-              pairIndex = indexesToRemove[i] - i;
+            for (i = 0; i < removePairIndex.length; i++) {
+              pairIndex = removePairIndex[i] - i;
               pair = pairsList[pairIndex];
-              delete pairsTable[pair.id];
               pairsList.splice(pairIndex, 1);
+              delete pairsTable[pair.id];
             }
           };
           Pairs.clear = function(pairs) {
@@ -3759,142 +3782,22 @@ var matter = createCommonjsModule(function(module, exports) {
         })();
       },
       function(module2, exports2, __webpack_require__) {
-        var Grid = {};
-        module2.exports = Grid;
-        var Pair = __webpack_require__(9);
-        var Common = __webpack_require__(0);
-        (function() {
-          Grid.create = function(options) {
-            var defaults = {
-              buckets: {},
-              pairs: {},
-              pairsList: [],
-              bucketWidth: 48,
-              bucketHeight: 48
-            };
-            return Common.extend(defaults, options);
-          };
-          Grid.update = function(grid, bodies, engine, forceUpdate) {
-            var i, col, row, world = engine.world, buckets = grid.buckets, bucket, bucketId, gridChanged = false;
-            for (i = 0; i < bodies.length; i++) {
-              var body = bodies[i];
-              if (body.isSleeping && !forceUpdate)
-                continue;
-              if (world.bounds && (body.bounds.max.x < world.bounds.min.x || body.bounds.min.x > world.bounds.max.x || body.bounds.max.y < world.bounds.min.y || body.bounds.min.y > world.bounds.max.y))
-                continue;
-              var newRegion = Grid._getRegion(grid, body);
-              if (!body.region || newRegion.id !== body.region.id || forceUpdate) {
-                if (!body.region || forceUpdate)
-                  body.region = newRegion;
-                var union = Grid._regionUnion(newRegion, body.region);
-                for (col = union.startCol; col <= union.endCol; col++) {
-                  for (row = union.startRow; row <= union.endRow; row++) {
-                    bucketId = Grid._getBucketId(col, row);
-                    bucket = buckets[bucketId];
-                    var isInsideNewRegion = col >= newRegion.startCol && col <= newRegion.endCol && row >= newRegion.startRow && row <= newRegion.endRow;
-                    var isInsideOldRegion = col >= body.region.startCol && col <= body.region.endCol && row >= body.region.startRow && row <= body.region.endRow;
-                    if (!isInsideNewRegion && isInsideOldRegion) {
-                      if (isInsideOldRegion) {
-                        if (bucket)
-                          Grid._bucketRemoveBody(grid, bucket, body);
-                      }
-                    }
-                    if (body.region === newRegion || isInsideNewRegion && !isInsideOldRegion || forceUpdate) {
-                      if (!bucket)
-                        bucket = Grid._createBucket(buckets, bucketId);
-                      Grid._bucketAddBody(grid, bucket, body);
-                    }
-                  }
-                }
-                body.region = newRegion;
-                gridChanged = true;
-              }
-            }
-            if (gridChanged)
-              grid.pairsList = Grid._createActivePairsList(grid);
-          };
-          Grid.clear = function(grid) {
-            grid.buckets = {};
-            grid.pairs = {};
-            grid.pairsList = [];
-          };
-          Grid._regionUnion = function(regionA, regionB) {
-            var startCol = Math.min(regionA.startCol, regionB.startCol), endCol = Math.max(regionA.endCol, regionB.endCol), startRow = Math.min(regionA.startRow, regionB.startRow), endRow = Math.max(regionA.endRow, regionB.endRow);
-            return Grid._createRegion(startCol, endCol, startRow, endRow);
-          };
-          Grid._getRegion = function(grid, body) {
-            var bounds = body.bounds, startCol = Math.floor(bounds.min.x / grid.bucketWidth), endCol = Math.floor(bounds.max.x / grid.bucketWidth), startRow = Math.floor(bounds.min.y / grid.bucketHeight), endRow = Math.floor(bounds.max.y / grid.bucketHeight);
-            return Grid._createRegion(startCol, endCol, startRow, endRow);
-          };
-          Grid._createRegion = function(startCol, endCol, startRow, endRow) {
-            return {
-              id: startCol + "," + endCol + "," + startRow + "," + endRow,
-              startCol,
-              endCol,
-              startRow,
-              endRow
-            };
-          };
-          Grid._getBucketId = function(column, row) {
-            return "C" + column + "R" + row;
-          };
-          Grid._createBucket = function(buckets, bucketId) {
-            var bucket = buckets[bucketId] = [];
-            return bucket;
-          };
-          Grid._bucketAddBody = function(grid, bucket, body) {
-            for (var i = 0; i < bucket.length; i++) {
-              var bodyB = bucket[i];
-              if (body.id === bodyB.id || body.isStatic && bodyB.isStatic)
-                continue;
-              var pairId = Pair.id(body, bodyB), pair = grid.pairs[pairId];
-              if (pair) {
-                pair[2] += 1;
-              } else {
-                grid.pairs[pairId] = [body, bodyB, 1];
-              }
-            }
-            bucket.push(body);
-          };
-          Grid._bucketRemoveBody = function(grid, bucket, body) {
-            bucket.splice(Common.indexOf(bucket, body), 1);
-            for (var i = 0; i < bucket.length; i++) {
-              var bodyB = bucket[i], pairId = Pair.id(body, bodyB), pair = grid.pairs[pairId];
-              if (pair)
-                pair[2] -= 1;
-            }
-          };
-          Grid._createActivePairsList = function(grid) {
-            var pairKeys, pair, pairs = [];
-            pairKeys = Common.keys(grid.pairs);
-            for (var k = 0; k < pairKeys.length; k++) {
-              pair = grid.pairs[pairKeys[k]];
-              if (pair[2] > 0) {
-                pairs.push(pair);
-              } else {
-                delete grid.pairs[pairKeys[k]];
-              }
-            }
-            return pairs;
-          };
-        })();
-      },
-      function(module2, exports2, __webpack_require__) {
-        var Matter2 = module2.exports = __webpack_require__(23);
-        Matter2.Axes = __webpack_require__(10);
-        Matter2.Bodies = __webpack_require__(11);
+        var Matter2 = module2.exports = __webpack_require__(22);
+        Matter2.Axes = __webpack_require__(11);
+        Matter2.Bodies = __webpack_require__(12);
         Matter2.Body = __webpack_require__(6);
         Matter2.Bounds = __webpack_require__(1);
+        Matter2.Collision = __webpack_require__(8);
         Matter2.Common = __webpack_require__(0);
         Matter2.Composite = __webpack_require__(5);
-        Matter2.Composites = __webpack_require__(24);
-        Matter2.Constraint = __webpack_require__(8);
+        Matter2.Composites = __webpack_require__(23);
+        Matter2.Constraint = __webpack_require__(10);
         Matter2.Contact = __webpack_require__(17);
-        Matter2.Detector = __webpack_require__(13);
+        Matter2.Detector = __webpack_require__(14);
         Matter2.Engine = __webpack_require__(18);
         Matter2.Events = __webpack_require__(4);
-        Matter2.Grid = __webpack_require__(21);
-        Matter2.Mouse = __webpack_require__(12);
+        Matter2.Grid = __webpack_require__(24);
+        Matter2.Mouse = __webpack_require__(13);
         Matter2.MouseConstraint = __webpack_require__(25);
         Matter2.Pair = __webpack_require__(9);
         Matter2.Pairs = __webpack_require__(20);
@@ -3903,12 +3806,12 @@ var matter = createCommonjsModule(function(module, exports) {
         Matter2.Render = __webpack_require__(16);
         Matter2.Resolver = __webpack_require__(19);
         Matter2.Runner = __webpack_require__(27);
-        Matter2.SAT = __webpack_require__(14);
+        Matter2.SAT = __webpack_require__(28);
         Matter2.Sleeping = __webpack_require__(7);
-        Matter2.Svg = __webpack_require__(28);
+        Matter2.Svg = __webpack_require__(29);
         Matter2.Vector = __webpack_require__(2);
         Matter2.Vertices = __webpack_require__(3);
-        Matter2.World = __webpack_require__(29);
+        Matter2.World = __webpack_require__(30);
         Matter2.Engine.run = Matter2.Runner.run;
         Matter2.Common.deprecated(Matter2.Engine, "run", "Engine.run \u27A4 use Matter.Runner.run(engine) instead");
       },
@@ -3919,7 +3822,7 @@ var matter = createCommonjsModule(function(module, exports) {
         var Common = __webpack_require__(0);
         (function() {
           Matter2.name = "matter-js";
-          Matter2.version = "0.17.1";
+          Matter2.version = "0.18.0";
           Matter2.uses = [];
           Matter2.used = [];
           Matter2.use = function() {
@@ -3939,10 +3842,10 @@ var matter = createCommonjsModule(function(module, exports) {
         var Composites = {};
         module2.exports = Composites;
         var Composite = __webpack_require__(5);
-        var Constraint = __webpack_require__(8);
+        var Constraint = __webpack_require__(10);
         var Common = __webpack_require__(0);
         var Body = __webpack_require__(6);
-        var Bodies = __webpack_require__(11);
+        var Bodies = __webpack_require__(12);
         var deprecated = Common.deprecated;
         (function() {
           Composites.stack = function(xx, yy, columns, rows, columnGap, rowGap, callback) {
@@ -4097,14 +4000,140 @@ var matter = createCommonjsModule(function(module, exports) {
         })();
       },
       function(module2, exports2, __webpack_require__) {
+        var Grid = {};
+        module2.exports = Grid;
+        var Pair = __webpack_require__(9);
+        var Common = __webpack_require__(0);
+        var deprecated = Common.deprecated;
+        (function() {
+          Grid.create = function(options) {
+            var defaults = {
+              buckets: {},
+              pairs: {},
+              pairsList: [],
+              bucketWidth: 48,
+              bucketHeight: 48
+            };
+            return Common.extend(defaults, options);
+          };
+          Grid.update = function(grid, bodies, engine, forceUpdate) {
+            var i, col, row, world = engine.world, buckets = grid.buckets, bucket, bucketId, gridChanged = false;
+            for (i = 0; i < bodies.length; i++) {
+              var body = bodies[i];
+              if (body.isSleeping && !forceUpdate)
+                continue;
+              if (world.bounds && (body.bounds.max.x < world.bounds.min.x || body.bounds.min.x > world.bounds.max.x || body.bounds.max.y < world.bounds.min.y || body.bounds.min.y > world.bounds.max.y))
+                continue;
+              var newRegion = Grid._getRegion(grid, body);
+              if (!body.region || newRegion.id !== body.region.id || forceUpdate) {
+                if (!body.region || forceUpdate)
+                  body.region = newRegion;
+                var union = Grid._regionUnion(newRegion, body.region);
+                for (col = union.startCol; col <= union.endCol; col++) {
+                  for (row = union.startRow; row <= union.endRow; row++) {
+                    bucketId = Grid._getBucketId(col, row);
+                    bucket = buckets[bucketId];
+                    var isInsideNewRegion = col >= newRegion.startCol && col <= newRegion.endCol && row >= newRegion.startRow && row <= newRegion.endRow;
+                    var isInsideOldRegion = col >= body.region.startCol && col <= body.region.endCol && row >= body.region.startRow && row <= body.region.endRow;
+                    if (!isInsideNewRegion && isInsideOldRegion) {
+                      if (isInsideOldRegion) {
+                        if (bucket)
+                          Grid._bucketRemoveBody(grid, bucket, body);
+                      }
+                    }
+                    if (body.region === newRegion || isInsideNewRegion && !isInsideOldRegion || forceUpdate) {
+                      if (!bucket)
+                        bucket = Grid._createBucket(buckets, bucketId);
+                      Grid._bucketAddBody(grid, bucket, body);
+                    }
+                  }
+                }
+                body.region = newRegion;
+                gridChanged = true;
+              }
+            }
+            if (gridChanged)
+              grid.pairsList = Grid._createActivePairsList(grid);
+          };
+          deprecated(Grid, "update", "Grid.update \u27A4 replaced by Matter.Detector");
+          Grid.clear = function(grid) {
+            grid.buckets = {};
+            grid.pairs = {};
+            grid.pairsList = [];
+          };
+          deprecated(Grid, "clear", "Grid.clear \u27A4 replaced by Matter.Detector");
+          Grid._regionUnion = function(regionA, regionB) {
+            var startCol = Math.min(regionA.startCol, regionB.startCol), endCol = Math.max(regionA.endCol, regionB.endCol), startRow = Math.min(regionA.startRow, regionB.startRow), endRow = Math.max(regionA.endRow, regionB.endRow);
+            return Grid._createRegion(startCol, endCol, startRow, endRow);
+          };
+          Grid._getRegion = function(grid, body) {
+            var bounds = body.bounds, startCol = Math.floor(bounds.min.x / grid.bucketWidth), endCol = Math.floor(bounds.max.x / grid.bucketWidth), startRow = Math.floor(bounds.min.y / grid.bucketHeight), endRow = Math.floor(bounds.max.y / grid.bucketHeight);
+            return Grid._createRegion(startCol, endCol, startRow, endRow);
+          };
+          Grid._createRegion = function(startCol, endCol, startRow, endRow) {
+            return {
+              id: startCol + "," + endCol + "," + startRow + "," + endRow,
+              startCol,
+              endCol,
+              startRow,
+              endRow
+            };
+          };
+          Grid._getBucketId = function(column, row) {
+            return "C" + column + "R" + row;
+          };
+          Grid._createBucket = function(buckets, bucketId) {
+            var bucket = buckets[bucketId] = [];
+            return bucket;
+          };
+          Grid._bucketAddBody = function(grid, bucket, body) {
+            var gridPairs = grid.pairs, pairId = Pair.id, bucketLength = bucket.length, i;
+            for (i = 0; i < bucketLength; i++) {
+              var bodyB = bucket[i];
+              if (body.id === bodyB.id || body.isStatic && bodyB.isStatic)
+                continue;
+              var id = pairId(body, bodyB), pair = gridPairs[id];
+              if (pair) {
+                pair[2] += 1;
+              } else {
+                gridPairs[id] = [body, bodyB, 1];
+              }
+            }
+            bucket.push(body);
+          };
+          Grid._bucketRemoveBody = function(grid, bucket, body) {
+            var gridPairs = grid.pairs, pairId = Pair.id, i;
+            bucket.splice(Common.indexOf(bucket, body), 1);
+            var bucketLength = bucket.length;
+            for (i = 0; i < bucketLength; i++) {
+              var pair = gridPairs[pairId(body, bucket[i])];
+              if (pair)
+                pair[2] -= 1;
+            }
+          };
+          Grid._createActivePairsList = function(grid) {
+            var pair, gridPairs = grid.pairs, pairKeys = Common.keys(gridPairs), pairKeysLength = pairKeys.length, pairs = [], k;
+            for (k = 0; k < pairKeysLength; k++) {
+              pair = gridPairs[pairKeys[k]];
+              if (pair[2] > 0) {
+                pairs.push(pair);
+              } else {
+                delete gridPairs[pairKeys[k]];
+              }
+            }
+            return pairs;
+          };
+        })();
+      },
+      function(module2, exports2, __webpack_require__) {
         var MouseConstraint = {};
         module2.exports = MouseConstraint;
         var Vertices = __webpack_require__(3);
         var Sleeping = __webpack_require__(7);
-        var Mouse = __webpack_require__(12);
+        var Mouse = __webpack_require__(13);
         var Events = __webpack_require__(4);
-        var Detector = __webpack_require__(13);
-        var Constraint = __webpack_require__(8);
+        var Detector = __webpack_require__(14);
+        var Constraint = __webpack_require__(10);
         var Composite = __webpack_require__(5);
         var Common = __webpack_require__(0);
         var Bounds = __webpack_require__(1);
@@ -4201,21 +4230,21 @@ var matter = createCommonjsModule(function(module, exports) {
         var Query = {};
         module2.exports = Query;
         var Vector = __webpack_require__(2);
-        var SAT = __webpack_require__(14);
+        var Collision = __webpack_require__(8);
         var Bounds = __webpack_require__(1);
-        var Bodies = __webpack_require__(11);
+        var Bodies = __webpack_require__(12);
         var Vertices = __webpack_require__(3);
         (function() {
           Query.collides = function(body, bodies) {
-            var collisions = [];
-            for (var i = 0; i < bodies.length; i++) {
-              var bodyA = bodies[i];
-              if (Bounds.overlaps(bodyA.bounds, body.bounds)) {
-                for (var j = bodyA.parts.length === 1 ? 0 : 1; j < bodyA.parts.length; j++) {
+            var collisions = [], bodiesLength = bodies.length, bounds = body.bounds, collides = Collision.collides, overlaps = Bounds.overlaps;
+            for (var i = 0; i < bodiesLength; i++) {
+              var bodyA = bodies[i], partsALength = bodyA.parts.length, partsAStart = partsALength === 1 ? 0 : 1;
+              if (overlaps(bodyA.bounds, bounds)) {
+                for (var j = partsAStart; j < partsALength; j++) {
                   var part = bodyA.parts[j];
-                  if (Bounds.overlaps(part.bounds, body.bounds)) {
-                    var collision = SAT.collides(part, body);
-                    if (collision.collided) {
+                  if (overlaps(part.bounds, bounds)) {
+                    var collision = collides(part, body);
+                    if (collision) {
                       collisions.push(collision);
                       break;
                     }
@@ -4361,6 +4390,19 @@ var matter = createCommonjsModule(function(module, exports) {
           Runner.start = function(runner, engine) {
             Runner.run(runner, engine);
           };
+        })();
+      },
+      function(module2, exports2, __webpack_require__) {
+        var SAT = {};
+        module2.exports = SAT;
+        var Collision = __webpack_require__(8);
+        var Common = __webpack_require__(0);
+        var deprecated = Common.deprecated;
+        (function() {
+          SAT.collides = function(bodyA, bodyB) {
+            return Collision.collides(bodyA, bodyB);
+          };
+          deprecated(SAT, "collides", "SAT.collides \u27A4 replaced by Collision.collides");
         })();
       },
       function(module2, exports2, __webpack_require__) {
